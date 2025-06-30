@@ -1,0 +1,41 @@
+﻿<Project Sdk="Microsoft.NET.Sdk">
+
+    <PropertyGroup>
+        <TargetFramework>netstandard2.0</TargetFramework>
+        <LangVersion>preview</LangVersion>
+        <Nullable>enable</Nullable>
+        <TreatWarningsAsErrors>true</TreatWarningsAsErrors>
+
+        <RootNamespace>DotValid</RootNamespace>
+        <GeneratePackageOnBuild>true</GeneratePackageOnBuild>
+        <GenerateDocumentationFile>true</GenerateDocumentationFile>
+        <PackageId>dotValid</PackageId>
+        <Authors>Frognar</Authors>
+        <Version>0.0.1</Version>
+        <Title>dotValid</Title>
+        <Description>A robust and flexible C# library for functional validation. This package provides a Validated{T} type, inspired by functional programming concepts, to handle validation results by explicitly distinguishing between successful outcomes (Success) and failures (Failure) containing a collection of ValidationError objects. It includes powerful Apply extension methods for applicative functor-style validation, allowing you to combine multiple validation results and aggregate all errors, rather than short-circuiting on the first failure. Ideal for building resilient and expressive validation logic in your .NET applications.</Description>
+        <Copyright>Frognar 2025</Copyright>
+        <PackageProjectUrl>https://github.com/Frognar/dotValid</PackageProjectUrl>
+        <PackageReadmeFile>README.md</PackageReadmeFile>
+        <PackageLicenseFile>LICENSE</PackageLicenseFile>
+        <RepositoryUrl>https://github.com/Frognar/dotValid</RepositoryUrl>
+        <RepositoryType>git</RepositoryType>
+        <PackageTags>validation, functional-programming, csharp, error-handling, immutable, dotValid, validated, fluent-api</PackageTags>
+        <PackageReleaseNotes>
+        </PackageReleaseNotes>
+    </PropertyGroup>
+
+    <ItemGroup>
+        <None Include="..\..\README.md" Pack="true" PackagePath=""/>
+        <None Include="..\..\LICENSE" Pack="true" PackagePath=""/>
+        <AdditionalFiles Include="Stylecop.json" />
+    </ItemGroup>
+
+    <ItemGroup>
+        <PackageReference Include="StyleCop.Analyzers" Version="1.2.0-beta.556">
+            <PrivateAssets>all</PrivateAssets>
+            <IncludeAssets>runtime; build; native; contentfiles; analyzers; buildtransitive</IncludeAssets>
+        </PackageReference>
+    </ItemGroup>
+
+</Project>

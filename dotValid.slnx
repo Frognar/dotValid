@@ -6,4 +6,7 @@
     <File Path=".gitignore" />
     <File Path=".editorconfig" />
   </Folder>
+  <Folder Name="/src/">
+    <Project Path="src\dotValid\dotValid.csproj" Type="Classic C#" />
+  </Folder>
 </Solution>
