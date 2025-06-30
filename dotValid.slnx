@@ -1,0 +1,9 @@
+﻿<Solution>
+  <Folder Name="/solution/">
+    <File Path="CONTRIBUTING.md" />
+    <File Path="LICENSE" />
+    <File Path="README.md" />
+    <File Path=".gitignore" />
+    <File Path=".editorconfig" />
+  </Folder>
+</Solution>
