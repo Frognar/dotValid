@@ -9,4 +9,7 @@
   <Folder Name="/src/">
     <Project Path="src\dotValid\dotValid.csproj" Type="Classic C#" />
   </Folder>
+  <Folder Name="/tests/">
+    <Project Path="tests\dotValid.Tests.Unit\dotValid.Tests.Unit.csproj" Type="Classic C#" />
+  </Folder>
 </Solution>
