@@ -10,7 +10,8 @@ namespace DotValid.PropertyTests;
 /// </summary>
 /// <remarks>
 /// Skipped in Debug builds (see <see cref="Allocations.SkipInDebug"/>); CI runs them in Release.
-/// Not covered on purpose: creating an invalid case or mapping its errors (that builds an array of errors), <c>Equals(object)</c> (boxes
+/// Not covered on purpose: creating an invalid case, mapping its errors or accumulating errors (each builds an array of
+/// errors), <c>Equals(object)</c> (boxes
 /// its argument), and <c>validated is null</c> / <c>is not null</c> on an initialized validation (the compiler reads the
 /// union's <c>Value</c>, which boxes the case). Reading an existing invalid case allocates nothing.
 /// </remarks>
@@ -75,6 +76,18 @@ public sealed class AllocationProperties
         Allocations.AssertNone("Ensure(factory) (kept)", () => _ = validated.Ensure(static _ => true, static number => -number));
         Allocations.AssertNone("Select", () => _ = validated.Select(static number => number + 1));
         Allocations.AssertNone("query", () => _ = from number in validated select number + 1);
+    }
+
+    [Property(Skip = Allocations.SkipInDebug)]
+    public void Combining_valid_validations_allocates_nothing(int value, int other)
+    {
+        var validated = Validations.Valid<int, int>(value);
+        var second = Validations.Valid<int, int>(other);
+        var function = Validations.Valid<Func<int, int>, int>(static number => number + 1);
+
+        Allocations.AssertNone("Zip", () => _ = validated.Zip(second));
+        Allocations.AssertNone("Zip(combine)", () => _ = validated.Zip(second, static (left, right) => left + right));
+        Allocations.AssertNone("Apply", () => _ = function.Apply(second));
     }
 
     [Property(Skip = Allocations.SkipInDebug)]

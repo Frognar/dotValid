@@ -97,6 +97,21 @@ Validated<int, ValidationProblem> typed =
 attach a field name or translate codes into messages. A `null` from either delegate is rejected with
 `InvalidOperationException`: a validation never holds `null`.
 
+### Combining
+
+```csharp
+Validated<string, string> name = Name(form.Name);
+Validated<int, string> age = Age(form.Age);
+
+Validated<(string, int), string> both = name.Zip(age);                     // every error of both, name's first
+Validated<Person, string> person = name.Zip(age, (n, a) => new Person(n, a));
+```
+
+This is where validation differs from a `Result`: `Zip` always reads both sides, and when both are invalid you get the
+errors of both, in order. The combining function runs only when every part is valid. All parts share one error type;
+translate a part with `MapError` first if they do not. `Apply` is the same thing in curried form,
+`personFunction.Apply(name).Apply(age)`, for those who prefer it.
+
 ### Dependent steps
 
 ```csharp
@@ -110,7 +125,7 @@ Validated<string, string> label = from number in Parse(input) select $"#{number}
 `Then` and `Ensure` need the value, so they run only for a valid validation and stop at the first invalid one, just
 like a `Result`: they never collect errors. That is deliberate, and it is why `Then` is not called `Bind` and why query
 syntax stops at `select` (a second `from` or a `where` does not compile). To report every problem at once, validate the
-independent parts separately and combine them (next section). A `Then` lambda that returns `valid(...)` or
+independent parts separately and combine them with `Zip`. A `Then` lambda that returns `valid(...)` or
 `invalid(...)` needs its type spelled out, `Then<int>(...)`, because union conversions take no part in type inference;
 a step that already returns a validation needs nothing.
 
