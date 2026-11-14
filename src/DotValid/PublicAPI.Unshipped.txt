@@ -25,12 +25,16 @@ DotValid.Validated<T, TError>.IUnionMembers.TryGetValue(out DotValid.Invalid<TEr
 DotValid.Validated<T, TError>.IUnionMembers.TryGetValue(out DotValid.Valid<T> value) -> bool
 DotValid.Validated<T, TError>.IUnionMembers.Value.get -> object?
 DotValid.Validated<T, TError>.Map<TResult>(System.Func<T, TResult>! map) -> DotValid.Validated<TResult, TError>
+DotValid.Validated<T, TError>.MapAsync<TResult>(System.Func<T, System.Threading.Tasks.Task<TResult>!>! map) -> System.Threading.Tasks.ValueTask<DotValid.Validated<TResult, TError>>
 DotValid.Validated<T, TError>.MapError<TNewError>(System.Func<TError, TNewError>! map) -> DotValid.Validated<T, TNewError>
 DotValid.Validated<T, TError>.Match<TResult>(System.Func<T, TResult>! valid, System.Func<System.Collections.Immutable.ImmutableArray<TError>, TResult>! invalid) -> TResult
+DotValid.Validated<T, TError>.MatchAsync<TResult>(System.Func<T, System.Threading.Tasks.Task<TResult>!>! valid, System.Func<System.Collections.Immutable.ImmutableArray<TError>, System.Threading.Tasks.Task<TResult>!>! invalid) -> System.Threading.Tasks.ValueTask<TResult>
+DotValid.Validated<T, TError>.MatchAsync<TResult>(System.Func<T, System.Threading.Tasks.Task<TResult>!>! valid, System.Func<System.Collections.Immutable.ImmutableArray<TError>, TResult>! invalid) -> System.Threading.Tasks.ValueTask<TResult>
 DotValid.Validated<T, TError>.OrDefault(System.Func<System.Collections.Immutable.ImmutableArray<TError>, T>! fallback) -> T
 DotValid.Validated<T, TError>.OrDefault(T fallback) -> T
 DotValid.Validated<T, TError>.Select<TResult>(System.Func<T, TResult>! selector) -> DotValid.Validated<TResult, TError>
 DotValid.Validated<T, TError>.Then<TResult>(System.Func<T, DotValid.Validated<TResult, TError>>! next) -> DotValid.Validated<TResult, TError>
+DotValid.Validated<T, TError>.ThenAsync<TResult>(System.Func<T, System.Threading.Tasks.Task<DotValid.Validated<TResult, TError>>!>! next) -> System.Threading.Tasks.ValueTask<DotValid.Validated<TResult, TError>>
 DotValid.Validated<T, TError>.Validated() -> void
 DotValid.Validated<T, TError>.Zip<TOther, TResult>(DotValid.Validated<TOther, TError> other, System.Func<T, TOther, TResult>! combine) -> DotValid.Validated<TResult, TError>
 DotValid.Validated<T, TError>.Zip<TOther>(DotValid.Validated<TOther, TError> other) -> DotValid.Validated<(T, TOther), TError>

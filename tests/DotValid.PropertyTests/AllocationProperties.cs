@@ -113,6 +113,19 @@ public sealed class AllocationProperties
     }
 
     [Property(Skip = Allocations.SkipInDebug)]
+    public void Async_members_with_completed_tasks_allocate_nothing(Validated<int, int> validated)
+    {
+        Allocations.AssertNone(
+            "MatchAsync(async, async)",
+            () => _ = validated.MatchAsync(static _ => CompletedOne, static _ => CompletedOne).IsCompleted);
+        Allocations.AssertNone(
+            "MatchAsync(async, sync)",
+            () => _ = validated.MatchAsync(static _ => CompletedOne, static errors => errors.Length).IsCompleted);
+        Allocations.AssertNone("MapAsync", () => _ = validated.MapAsync(static _ => CompletedOne).IsCompleted);
+        Allocations.AssertNone("ThenAsync", () => _ = validated.ThenAsync(static _ => CompletedValidOne).IsCompleted);
+    }
+
+    [Property(Skip = Allocations.SkipInDebug)]
     public void Comparing_allocates_nothing(Validated<int, int> validated, Validated<int, int> other)
     {
         Allocations.AssertNone("Equals", () => _ = validated.Equals(other));
@@ -123,6 +136,10 @@ public sealed class AllocationProperties
     }
 
     private const string? Text = "text";
+
+    // Tasks completed in advance: any allocation in the async tests comes from the library, not from the delegate.
+    private static readonly Task<int> CompletedOne = Task.FromResult(1);
+    private static readonly Task<Validated<int, int>> CompletedValidOne = Task.FromResult(Validations.Valid<int, int>(1));
 
     private static Validated<int, int> Succeed(int value) => valid(value);
 

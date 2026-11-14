@@ -173,6 +173,24 @@ independent parts separately and combine them with `Zip`. A `Then` lambda that r
 `invalid(...)` needs its type spelled out, `Then<int>(...)`, because union conversions take no part in type inference;
 a step that already returns a validation needs nothing.
 
+### Async
+
+```csharp
+Validated<User, string> user = await Login(form.Login)
+    .ThenAsync(login => repository.FindAsync(login));            // a dependent step that hits the database
+
+string message = await user.MatchAsync(
+    async found => await GreetAsync(found),
+    errors => string.Join("; ", errors));                         // a synchronous branch is fine too
+
+Validated<string, string> name = await user.MapAsync(found => LoadDisplayNameAsync(found));
+```
+
+The async members are deliberately few. The delegates return `Task<T>`; the methods return `ValueTask<T>`, already
+complete (and allocation-free) when the case passes through. Arguments are checked immediately; anything a delegate
+throws comes out when the result is awaited, and an `OperationCanceledException` for a requested token gives a
+canceled result.
+
 ### The uninitialized validation
 
 `Validated<T, TError>` is a struct, so `default(Validated<T, TError>)` exists, for example in a new array. It is
