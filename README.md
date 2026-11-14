@@ -124,6 +124,23 @@ errors of both, in order. The combining function runs only when every part is va
 translate a part with `MapError` first if they do not. `Apply` is the same thing in curried form,
 `personFunction.Apply(name).Apply(age)`, for those who prefer it.
 
+### Building blocks
+
+```csharp
+Validated<int, ValidationError> Age(int age) =>
+    Validated.Check(age, a => a >= 0, new ValidationError("Age", "must not be negative"));
+
+Validated<string, ValidationError> Email(string? email) =>
+    Validated.FromNullable(email, new ValidationError("Email", "is required"))
+        .Ensure(e => e.Contains('@'), e => new ValidationError("Email", $"'{e}' has no @"));
+```
+
+`Validated.Check` turns a predicate into a validation and `Validated.FromNullable` turns `null` into an error, for
+nullable value types and references alike; both also take a function that produces the error only when needed.
+`ValidationError(Property, Message)` is a ready-made error type (`ToString()` gives `Property: Message`); any type can
+be the error, it is there for the common case. There is no rule DSL on purpose: rules are plain functions that return a
+validation.
+
 ### Dependent steps
 
 ```csharp

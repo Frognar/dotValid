@@ -79,6 +79,8 @@ public readonly partial struct Validated<T, TError>
 
     internal static Validated<T, TError> FromValue(T value) => new(new Valid<T>(value));
 
+    internal static Validated<T, TError> FromError(TError error) => new(new Invalid<TError>(error));
+
     // Every error of the inputs that have some, in argument order; at least one input must be invalid.
     internal static Validated<T, TError> FromErrors(params ReadOnlySpan<ImmutableArray<TError>> errors)
     {
