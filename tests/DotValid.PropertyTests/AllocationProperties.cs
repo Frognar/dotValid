@@ -88,6 +88,13 @@ public sealed class AllocationProperties
         Allocations.AssertNone("Zip", () => _ = validated.Zip(second));
         Allocations.AssertNone("Zip(combine)", () => _ = validated.Zip(second, static (left, right) => left + right));
         Allocations.AssertNone("Apply", () => _ = function.Apply(second));
+        Allocations.AssertNone("Combine(2)", () => _ = Validated.Combine(validated, second, static (a, b) => a + b));
+        Allocations.AssertNone("Combine(3)", () => _ = Validated.Combine(validated, second, validated, static (a, b, c) => a + b + c));
+        Allocations.AssertNone(
+            "Combine(8)",
+            () => _ = Validated.Combine(
+                validated, second, validated, second, validated, second, validated, second,
+                static (a, b, c, d, e, f, g, h) => a + b + c + d + e + f + g + h));
     }
 
     [Property(Skip = Allocations.SkipInDebug)]

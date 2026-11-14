@@ -126,6 +126,17 @@ public sealed class UninitializedProperties
     }
 
     [Fact]
+    public void Combine_rejects_it_and_runs_nothing()
+    {
+        var calls = 0;
+
+        Assert.Throws<ArgumentException>(() => Validated.Combine(Uninitialized, Uninitialized, (a, b) => ++calls));
+        Assert.Throws<ArgumentException>(
+            () => Validated.Combine(Validations.Valid<int, string>(1), Uninitialized, Uninitialized, (a, b, c) => ++calls));
+        Assert.Equal(0, calls);
+    }
+
+    [Fact]
     public void The_union_members_report_no_case()
     {
         Validated<int, string>.IUnionMembers members = Uninitialized;

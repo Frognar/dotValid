@@ -107,6 +107,18 @@ Validated<(string, int), string> both = name.Zip(age);                     // ev
 Validated<Person, string> person = name.Zip(age, (n, a) => new Person(n, a));
 ```
 
+For more parts, `Validated.Combine` takes two to eight validations and a function that receives every value:
+
+```csharp
+Validated<Person, string> person = Validated.Combine(
+    Name(form.Name),
+    Age(form.Age),
+    Email(form.Email),
+    (name, age, email) => new Person(name, age, email));         // or just: Person.Create
+
+// Invalid(["name is empty", "email has no @"]) when two fields are wrong
+```
+
 This is where validation differs from a `Result`: `Zip` always reads both sides, and when both are invalid you get the
 errors of both, in order. The combining function runs only when every part is valid. All parts share one error type;
 translate a part with `MapError` first if they do not. `Apply` is the same thing in curried form,

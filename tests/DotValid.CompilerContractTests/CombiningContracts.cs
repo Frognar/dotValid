@@ -43,4 +43,38 @@ public sealed class CombiningContracts
 
         ContractAssert.DoesNotCompile(result);
     }
+
+    [Fact]
+    public void Combine_infers_every_type_from_the_validations_and_the_combiner()
+    {
+        var result = Snippet.Compile(Consumer.File("""
+                public sealed record Person(string Name, int Age, string Email);
+
+                private static Validated<string, string> Name(string text) => text.Length > 0 ? valid(text) : invalid("name is empty");
+                private static Validated<int, string> Age(int age) => age >= 0 ? valid(age) : invalid("age is negative");
+                private static Validated<string, string> Email(string text) => text.Contains('@') ? valid(text) : invalid("email has no @");
+
+                public static Validated<Person, string> Lambda(string name, int age, string email) =>
+                    Validated.Combine(Name(name), Age(age), Email(email), (n, a, e) => new Person(n, a, e));
+
+                public static Validated<Person, string> Constructor(string name, int age, string email) =>
+                    Validated.Combine(Name(name), Age(age), Email(email), Create);
+
+                private static Person Create(string name, int age, string email) => new(name, age, email);
+            """));
+
+        ContractAssert.CompilesCleanly(result);
+    }
+
+    [Fact]
+    public void Combine_needs_one_error_type()
+    {
+        var result = Snippet.Compile(Consumer.File("""
+                public static Validated<int, string> Sum(Validated<int, string> first, Validated<int, int> second) =>
+                    Validated.Combine(first, second, (a, b) => a + b);
+            """));
+
+        ContractAssert.DoesNotCompile(result);
+    }
 }
+
