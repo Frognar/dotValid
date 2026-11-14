@@ -70,6 +70,11 @@ public sealed class AllocationProperties
 
         Allocations.AssertNone("Map", () => _ = validated.Map(static number => number + 1));
         Allocations.AssertNone("MapError", () => _ = validated.MapError(static error => (long)error));
+        Allocations.AssertNone("Then", () => _ = validated.Then(static number => Validations.Valid<int, int>(number + 1)));
+        Allocations.AssertNone("Ensure (kept)", () => _ = validated.Ensure(static _ => true, -1));
+        Allocations.AssertNone("Ensure(factory) (kept)", () => _ = validated.Ensure(static _ => true, static number => -number));
+        Allocations.AssertNone("Select", () => _ = validated.Select(static number => number + 1));
+        Allocations.AssertNone("query", () => _ = from number in validated select number + 1);
     }
 
     [Property(Skip = Allocations.SkipInDebug)]

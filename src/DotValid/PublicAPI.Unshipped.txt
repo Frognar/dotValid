@@ -14,6 +14,8 @@ DotValid.Valid<T>.Valid() -> void
 DotValid.Valid<T>.Valid(T value) -> void
 DotValid.Valid<T>.Value.get -> T
 DotValid.Validated<T, TError>
+DotValid.Validated<T, TError>.Ensure(System.Func<T, bool>! predicate, System.Func<T, TError>! error) -> DotValid.Validated<T, TError>
+DotValid.Validated<T, TError>.Ensure(System.Func<T, bool>! predicate, TError error) -> DotValid.Validated<T, TError>
 DotValid.Validated<T, TError>.Equals(DotValid.Validated<T, TError> other) -> bool
 DotValid.Validated<T, TError>.IUnionMembers
 DotValid.Validated<T, TError>.IUnionMembers.Create(DotValid.Invalid<TError> value) -> DotValid.Validated<T, TError>
@@ -26,6 +28,8 @@ DotValid.Validated<T, TError>.MapError<TNewError>(System.Func<TError, TNewError>
 DotValid.Validated<T, TError>.Match<TResult>(System.Func<T, TResult>! valid, System.Func<System.Collections.Immutable.ImmutableArray<TError>, TResult>! invalid) -> TResult
 DotValid.Validated<T, TError>.OrDefault(System.Func<System.Collections.Immutable.ImmutableArray<TError>, T>! fallback) -> T
 DotValid.Validated<T, TError>.OrDefault(T fallback) -> T
+DotValid.Validated<T, TError>.Select<TResult>(System.Func<T, TResult>! selector) -> DotValid.Validated<TResult, TError>
+DotValid.Validated<T, TError>.Then<TResult>(System.Func<T, DotValid.Validated<TResult, TError>>! next) -> DotValid.Validated<TResult, TError>
 DotValid.Validated<T, TError>.Validated() -> void
 override DotValid.Invalid<TError>.Equals(object? obj) -> bool
 override DotValid.Invalid<TError>.GetHashCode() -> int
