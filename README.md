@@ -186,6 +186,21 @@ string message = await user.MatchAsync(
 Validated<string, string> name = await user.MapAsync(found => LoadDisplayNameAsync(found));
 ```
 
+Independent checks that need I/O combine with `Validated.CombineAsync`, the asynchronous `Combine`: the tasks run
+concurrently and every error of every check comes back. Every input is a task, so a synchronous check goes in as
+`Task.FromResult(...)` (C# cannot infer the types of a mix of plain validations and tasks). Often it reads better to
+combine the synchronous checks on their own and join both parts with `Zip`:
+
+```csharp
+var local = Validated.Combine(Name(dto.Name), Age(dto.Age), (name, age) => (name, age));
+var remote = await Validated.CombineAsync(
+    EmailIsFree(dto.Email),                                    // Task<Validated<string, string>>
+    LoginIsFree(dto.Login),
+    (email, login) => (email, login));
+
+Validated<User, string> user = local.Zip(remote, (l, r) => new User(l.name, l.age, r.email, r.login));
+```
+
 The async members are deliberately few. The delegates return `Task<T>`; the methods return `ValueTask<T>`, already
 complete (and allocation-free) when the case passes through. Arguments are checked immediately; anything a delegate
 throws comes out when the result is awaited, and an `OperationCanceledException` for a requested token gives a

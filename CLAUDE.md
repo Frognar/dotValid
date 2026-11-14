@@ -69,8 +69,9 @@ nested `IUnionMembers` explicitly so it stays out of the public API), `Valid.cs`
 - **V8 Dependent steps:** `Then`/`Ensure` short-circuit; deliberately not called `Bind`, and no `SelectMany`.
 - **V9 Zero allocation** on the valid path for value types in Release builds; an invalid validation allocates its
   errors (documented exclusion).
-- **V10 Async, minimal:** `MatchAsync`, `MapAsync`, `ThenAsync`, `Validated.CombineAsync` over any mix of
-  `Validated` and `Task<Validated>`; `ValueTask` results with dotResult's R8 semantics.
+- **V10 Async, minimal:** `MatchAsync`, `MapAsync`, `ThenAsync`, and `Validated.CombineAsync` over 2–8
+  `Task<Validated>` inputs (a synchronous one goes in as `Task.FromResult(x)`; mixing bare validations and tasks cannot
+  infer types, see #16). `ValueTask` results with dotResult's R8 semantics. Split sync and async checks, then `Zip`.
 - **V11 Equality:** values by `EqualityComparer<T>.Default`, errors as sequences; valid never equals invalid. No ordering.
 - **V12 Collections** accumulate all errors. **V13** Small helpers (`Check`, `FromNullable`, `ValidationError`).
 - **V14 Quality gates:** AOT/trimming clean, `AnalysisLevel latest-all` + `TreatWarningsAsErrors`, PublicAPI analyzer,
