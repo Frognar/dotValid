@@ -5,31 +5,37 @@
 Applicative validation for C# 15 built on union types: a `Validated<T, TError>` is either a valid value or one or more
 errors, and independent validations combine by accumulating every error instead of stopping at the first one.
 
-> **Status:** 1.0 is a ground-up rewrite for .NET 11 and C# 15 unions, under active development. The 0.5 line is
-> retired; its code lives on the [`archive/0.5`](https://github.com/Frognar/dotValid/tree/archive/0.5) branch.
+> **Status:** 1.0 is a ground-up rewrite for .NET 11 and C# 15 unions, now in beta: the API is complete. The 0.5
+> line is retired; see [Migrating from 0.5](#migrating-from-05).
 
 ```csharp
 using DotValid;
 using static DotValid.Prelude;
 
+Validated<string, string> Name(string name) => name.Length > 0 ? valid(name) : invalid("name is empty");
 Validated<int, string> Age(int age) => age >= 0 ? valid(age) : invalid("age is negative");
 
-var message = Age(-1) switch
+Validated<Person, string> person = Validated.Combine(Name(form.Name), Age(form.Age), (n, a) => new Person(n, a));
+
+var message = person switch
 {
-    Valid<int>(var age) => $"age {age}",
-    Invalid<string>(var errors) => string.Join(", ", errors),
+    Valid<Person>(var p) => $"welcome, {p.Name}",
+    Invalid<string>(var errors) => string.Join("; ", errors),   // "name is empty; age is negative"
 };
 ```
 
+- **Every error, not just the first.** Independent validations combine with `Zip`, `Combine`, `CombineAsync`,
+  `Sequence` and `Traverse`, which read every input and collect every error in order. An invalid validation is never
+  empty.
 - **Union types.** `Validated<T, TError>` has exactly two cases, `Valid<T>` and `Invalid<TError>`. Both convert
   implicitly, and a `switch` that handles both is exhaustive. `Validated<string, string>` is never ambiguous.
-- **Every error, not just the first.** An invalid validation holds one or more errors, in order, and is never empty.
-  Independent validations combine by collecting all their errors (arriving in the 1.0.0 alphas).
+- **Your error type.** Any type can be the error; `ValidationError(Property, Message)` is there for the common case.
 - **No invalid values.** `null` is never a value or an error, and there is no `.Value`, `IsValid` or other accessor
-  that can throw: you get the content out through pattern matching.
-- **No allocations** on the valid path for value types.
-
-The plan for 1.0 is tracked in the [milestones](https://github.com/Frognar/dotValid/milestones).
+  that can throw: you get the content out through pattern matching, `Match` or `OrDefault`.
+- **Functional API.** `Match`, `OrDefault`, `Map`, `MapError`, `Zip`, `Combine`, `Apply`, dependent steps with `Then`
+  and `Ensure`, `Check` and `FromNullable`, collections, and async (`MatchAsync`, `MapAsync`, `ThenAsync`,
+  `CombineAsync`).
+- **No allocations** on the valid path for value types; trimming and Native AOT compatible; no dependencies.
 
 ## Usage
 
@@ -212,6 +218,22 @@ canceled result.
 neither case: a `switch` over both cases throws `SwitchExpressionException`, and every operation that reads it throws
 `InvalidOperationException`. Equality, hashing and `ToString()` (`Uninitialized`) still work, and `validated is null`
 is `true` only for an uninitialized validation. Always create validations with `valid` or `invalid`.
+
+## Migrating from 0.5
+
+1.0 is a new library with the same name, not an upgrade in place: 0.5 lives on in the
+[`archive/0.5`](https://github.com/Frognar/dotValid/tree/archive/0.5) branch and its package. The main differences:
+
+| 0.5 | 1.0 |
+|---|---|
+| `Validated<T>` with a fixed `ValidationError(PropertyName, Error)` | `Validated<T, TError>` with any error type; `ValidationError(Property, Message)` is ready-made |
+| `Validation.Succeed(value)` | `valid(value)` |
+| `Validation.Failed<T>(errors)` | `invalid(error)`, `invalid(first, second)`, `invalid([.. errors])` |
+| `IsValid` | pattern matching: `validated is Valid<T>`, a `switch` over `Valid<T>` and `Invalid<TError>` |
+| `Match(errors, value)`, errors as `IEnumerable` | `Match(valid, invalid)`: the value comes first, the errors are an `ImmutableArray` |
+| curried `function.Apply(v1).Apply(v2)...` (up to 16) | `Validated.Combine(v1, ..., v8, combine)`, `Zip`, or `Apply` on a validated function |
+| — | `Then`/`Ensure`, `Check`/`FromNullable`, collections, async |
+| .NET Standard 2.0 | .NET 11 (C# 15) |
 
 ## Requirements
 
