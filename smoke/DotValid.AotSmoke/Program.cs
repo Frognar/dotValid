@@ -30,6 +30,11 @@ Check(failed.MapError(static error => error.Length) == invalid(5, 9) && age.MapE
 Check(Parse("20").Then(Adult) == valid(20) && Parse("7").Then(Adult) == invalid("too young") && failed.Then(Adult) == failed, "Then");
 Check(age.Ensure(static value => value > 100, "too small") == invalid("too small") && age.Ensure(static value => value > 0, "never") == age, "Ensure");
 Check((from value in age select value + 1) == valid(43), "query syntax");
+Validated<string, string> name = invalid("name is empty");
+Check(age.Zip(Parse("7")) == valid((42, 7)) && name.Zip(failed) == invalid("name is empty", "empty", "too short"), "Zip accumulates");
+Check(name.Zip(age, static (n, a) => $"{n} {a}") == invalid("name is empty"), "Zip(combine)");
+Validated<Func<int, int>, string> twice = valid<Func<int, int>>(static value => value * 2);
+Check(twice.Apply(age) == valid(84) && twice.Apply(failed) == failed, "Apply");
 
 if (failures.Count > 0)
 {

@@ -13,6 +13,7 @@ DotValid.Valid<T>.Equals(DotValid.Valid<T> other) -> bool
 DotValid.Valid<T>.Valid() -> void
 DotValid.Valid<T>.Valid(T value) -> void
 DotValid.Valid<T>.Value.get -> T
+DotValid.Validated
 DotValid.Validated<T, TError>
 DotValid.Validated<T, TError>.Ensure(System.Func<T, bool>! predicate, System.Func<T, TError>! error) -> DotValid.Validated<T, TError>
 DotValid.Validated<T, TError>.Ensure(System.Func<T, bool>! predicate, TError error) -> DotValid.Validated<T, TError>
@@ -31,6 +32,8 @@ DotValid.Validated<T, TError>.OrDefault(T fallback) -> T
 DotValid.Validated<T, TError>.Select<TResult>(System.Func<T, TResult>! selector) -> DotValid.Validated<TResult, TError>
 DotValid.Validated<T, TError>.Then<TResult>(System.Func<T, DotValid.Validated<TResult, TError>>! next) -> DotValid.Validated<TResult, TError>
 DotValid.Validated<T, TError>.Validated() -> void
+DotValid.Validated<T, TError>.Zip<TOther, TResult>(DotValid.Validated<TOther, TError> other, System.Func<T, TOther, TResult>! combine) -> DotValid.Validated<TResult, TError>
+DotValid.Validated<T, TError>.Zip<TOther>(DotValid.Validated<TOther, TError> other) -> DotValid.Validated<(T, TOther), TError>
 override DotValid.Invalid<TError>.Equals(object? obj) -> bool
 override DotValid.Invalid<TError>.GetHashCode() -> int
 override DotValid.Invalid<TError>.ToString() -> string!
@@ -47,5 +50,6 @@ static DotValid.Prelude.invalid<TError>(TError error) -> DotValid.Invalid<TError
 static DotValid.Prelude.valid<T>(T value) -> DotValid.Valid<T>
 static DotValid.Valid<T>.operator !=(DotValid.Valid<T> left, DotValid.Valid<T> right) -> bool
 static DotValid.Valid<T>.operator ==(DotValid.Valid<T> left, DotValid.Valid<T> right) -> bool
+static DotValid.Validated.Apply<T, TResult, TError>(this DotValid.Validated<System.Func<T, TResult>!, TError> function, DotValid.Validated<T, TError> argument) -> DotValid.Validated<TResult, TError>
 static DotValid.Validated<T, TError>.operator !=(DotValid.Validated<T, TError> left, DotValid.Validated<T, TError> right) -> bool
 static DotValid.Validated<T, TError>.operator ==(DotValid.Validated<T, TError> left, DotValid.Validated<T, TError> right) -> bool

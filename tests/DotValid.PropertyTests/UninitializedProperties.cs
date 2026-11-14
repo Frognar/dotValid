@@ -114,6 +114,18 @@ public sealed class UninitializedProperties
     }
 
     [Fact]
+    public void Zip_and_Apply_throw_and_run_nothing()
+    {
+        var calls = 0;
+
+        Assert.Throws<InvalidOperationException>(() => Uninitialized.Zip(Validations.Valid<int, string>(1)));
+        Assert.Throws<InvalidOperationException>(() => Uninitialized.Zip(Validations.Valid<int, string>(1), (a, b) => ++calls + a + b));
+        Assert.Throws<InvalidOperationException>(
+            () => default(Validated<Func<int, int>, string>).Apply(Validations.Valid<int, string>(1)));
+        Assert.Equal(0, calls);
+    }
+
+    [Fact]
     public void The_union_members_report_no_case()
     {
         Validated<int, string>.IUnionMembers members = Uninitialized;
