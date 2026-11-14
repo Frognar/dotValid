@@ -80,9 +80,8 @@ public readonly struct Invalid<TError> : IEquatable<Invalid<TError>>
     /// <param name="other">The case to compare with.</param>
     /// <returns><see langword="true"/> when the errors are equal; otherwise <see langword="false"/>.</returns>
     public bool Equals(Invalid<TError> other) =>
-        _errors.IsDefault || other._errors.IsDefault
-            ? _errors.IsDefault && other._errors.IsDefault
-            : _errors.AsSpan().SequenceEqual(other._errors.AsSpan(), EqualityComparer<TError>.Default);
+        // A default case reads as no errors, which a real case never has: it equals only another default case.
+        _errors.AsSpan().SequenceEqual(other._errors.AsSpan(), EqualityComparer<TError>.Default);
 
     /// <inheritdoc/>
     public override bool Equals(object? obj) => obj is Invalid<TError> other && Equals(other);

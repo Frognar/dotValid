@@ -18,7 +18,7 @@ public static class Prelude
     /// <exception cref="ArgumentNullException"><paramref name="value"/> is null.</exception>
 #pragma warning disable IDE1006 // Naming rule violation: lower-case names are intentional (keyword-like functions).
     public static Valid<T> valid<T>(T value)
-        where T : notnull => throw new NotImplementedException();
+        where T : notnull => new(value);
 
     /// <summary>
     /// Creates the invalid case with a single error.
@@ -28,7 +28,7 @@ public static class Prelude
     /// <returns>The invalid case holding <paramref name="error"/>.</returns>
     /// <exception cref="ArgumentNullException"><paramref name="error"/> is null.</exception>
     public static Invalid<TError> invalid<TError>(TError error)
-        where TError : notnull => throw new NotImplementedException();
+        where TError : notnull => new(error);
 
     /// <summary>
     /// Creates the invalid case with several errors, in order: <c>invalid(first, second)</c> or
@@ -43,6 +43,6 @@ public static class Prelude
     /// <returns>The invalid case holding <paramref name="errors"/>.</returns>
     /// <exception cref="ArgumentException"><paramref name="errors"/> is empty or holds a null error.</exception>
     public static Invalid<TError> invalid<TError>(params ReadOnlySpan<TError> errors)
-        where TError : notnull => throw new NotImplementedException();
+        where TError : notnull => new(errors);
 #pragma warning restore IDE1006
 }
