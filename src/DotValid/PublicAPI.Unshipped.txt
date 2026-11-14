@@ -1,0 +1,39 @@
+#nullable enable
+DotValid.Invalid<TError>
+DotValid.Invalid<TError>.Deconstruct(out System.Collections.Immutable.ImmutableArray<TError> errors) -> void
+DotValid.Invalid<TError>.Equals(DotValid.Invalid<TError> other) -> bool
+DotValid.Invalid<TError>.Errors.get -> System.Collections.Immutable.ImmutableArray<TError>
+DotValid.Invalid<TError>.Invalid() -> void
+DotValid.Invalid<TError>.Invalid(params System.ReadOnlySpan<TError> errors) -> void
+DotValid.Invalid<TError>.Invalid(TError error) -> void
+DotValid.Prelude
+DotValid.Valid<T>
+DotValid.Valid<T>.Deconstruct(out T value) -> void
+DotValid.Valid<T>.Equals(DotValid.Valid<T> other) -> bool
+DotValid.Valid<T>.Valid() -> void
+DotValid.Valid<T>.Valid(T value) -> void
+DotValid.Valid<T>.Value.get -> T
+DotValid.Validated<T, TError>
+DotValid.Validated<T, TError>.Equals(DotValid.Validated<T, TError> other) -> bool
+DotValid.Validated<T, TError>.IUnionMembers
+DotValid.Validated<T, TError>.IUnionMembers.Create(DotValid.Invalid<TError> value) -> DotValid.Validated<T, TError>
+DotValid.Validated<T, TError>.IUnionMembers.Create(DotValid.Valid<T> value) -> DotValid.Validated<T, TError>
+DotValid.Validated<T, TError>.IUnionMembers.TryGetValue(out DotValid.Invalid<TError> value) -> bool
+DotValid.Validated<T, TError>.IUnionMembers.TryGetValue(out DotValid.Valid<T> value) -> bool
+DotValid.Validated<T, TError>.IUnionMembers.Value.get -> object?
+DotValid.Validated<T, TError>.Validated() -> void
+override DotValid.Invalid<TError>.Equals(object? obj) -> bool
+override DotValid.Invalid<TError>.GetHashCode() -> int
+override DotValid.Valid<T>.Equals(object? obj) -> bool
+override DotValid.Valid<T>.GetHashCode() -> int
+override DotValid.Validated<T, TError>.Equals(object? obj) -> bool
+override DotValid.Validated<T, TError>.GetHashCode() -> int
+static DotValid.Invalid<TError>.operator !=(DotValid.Invalid<TError> left, DotValid.Invalid<TError> right) -> bool
+static DotValid.Invalid<TError>.operator ==(DotValid.Invalid<TError> left, DotValid.Invalid<TError> right) -> bool
+static DotValid.Prelude.invalid<TError>(params System.ReadOnlySpan<TError> errors) -> DotValid.Invalid<TError>
+static DotValid.Prelude.invalid<TError>(TError error) -> DotValid.Invalid<TError>
+static DotValid.Prelude.valid<T>(T value) -> DotValid.Valid<T>
+static DotValid.Valid<T>.operator !=(DotValid.Valid<T> left, DotValid.Valid<T> right) -> bool
+static DotValid.Valid<T>.operator ==(DotValid.Valid<T> left, DotValid.Valid<T> right) -> bool
+static DotValid.Validated<T, TError>.operator !=(DotValid.Validated<T, TError> left, DotValid.Validated<T, TError> right) -> bool
+static DotValid.Validated<T, TError>.operator ==(DotValid.Validated<T, TError> left, DotValid.Validated<T, TError> right) -> bool

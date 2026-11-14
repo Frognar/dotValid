@@ -1,0 +1,22 @@
+<Solution>
+  <Folder Name="/src/">
+    <Project Path="src/DotValid/DotValid.csproj" />
+  </Folder>
+  <Folder Name="/benchmarks/">
+    <Project Path="benchmarks/DotValid.Benchmarks/DotValid.Benchmarks.csproj" />
+  </Folder>
+  <Folder Name="/tests/">
+    <Project Path="tests/DotValid.CompilerContractTests/DotValid.CompilerContractTests.csproj" />
+    <Project Path="tests/DotValid.PropertyTests/DotValid.PropertyTests.csproj" />
+  </Folder>
+  <Folder Name="/smoke/">
+    <Project Path="smoke/DotValid.AotSmoke/DotValid.AotSmoke.csproj" />
+  </Folder>
+  <Folder Name="/Solution Items/">
+    <File Path=".editorconfig" />
+    <File Path="Directory.Build.props" />
+    <File Path="Directory.Packages.props" />
+    <File Path="global.json" />
+    <File Path="README.md" />
+  </Folder>
+</Solution>
