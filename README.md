@@ -73,6 +73,18 @@ if (Parse(text) is Valid<int>(var number) && number > 0) { /* ... */ }
 A `switch` over both cases is exhaustive. The errors come in the order they were added. `ToString()` gives
 `Valid(42)` or `Invalid([first, second])`, also in the debugger.
 
+```csharp
+string text = Parse(input).Match(
+    valid: number => $"parsed {number}",
+    invalid: errors => $"{errors.Length} problem(s)");     // exactly one branch runs
+
+int number = Parse(input).OrDefault(0);
+int length = Parse(input).OrDefault(errors => -errors.Length);   // the factory runs only for an invalid validation
+```
+
+`Match` takes the value first, then the errors. Inside such a lambda, a parameter named `valid` or `invalid` hides the
+`Prelude` function of the same name; name it `value` or `errors` when the body creates a validation.
+
 ### The uninitialized validation
 
 `Validated<T, TError>` is a struct, so `default(Validated<T, TError>)` exists, for example in a new array. It is

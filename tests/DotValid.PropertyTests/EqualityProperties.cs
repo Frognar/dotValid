@@ -111,6 +111,15 @@ public sealed class EqualityProperties
     }
 
     [Fact]
+    public void Hash_codes_depend_on_the_errors_and_the_case()
+    {
+        // Not a law (different contents may collide), but these fixed pairs must not: hashing reads every error.
+        Assert.NotEqual(new Invalid<int>(1).GetHashCode(), new Invalid<int>(2).GetHashCode());
+        Assert.NotEqual(new Invalid<int>(1, 2).GetHashCode(), new Invalid<int>(1, 3).GetHashCode());
+        Assert.NotEqual(Validations.Valid<int, int>(1).GetHashCode(), Validations.Invalid<int, int>(1).GetHashCode());
+    }
+
+    [Fact]
     public void Default_invalid_cases_are_equal_to_each_other_only()
     {
         Assert.True(default(Invalid<int>) == default(Invalid<int>));
