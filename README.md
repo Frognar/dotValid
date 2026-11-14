@@ -5,8 +5,8 @@
 Applicative validation for C# 15 built on union types: a `Validated<T, TError>` is either a valid value or one or more
 errors, and independent validations combine by accumulating every error instead of stopping at the first one.
 
-> **Status:** 1.0 is a ground-up rewrite for .NET 11 and C# 15 unions, now in beta: the API is complete. The 0.5
-> line is retired; see [Migrating from 0.5](#migrating-from-05).
+> **Status:** 1.0 is a ground-up rewrite for .NET 11 and C# 15 unions. The 0.5 line is retired; see
+> [Migrating from 0.5](#migrating-from-05).
 
 ```csharp
 using DotValid;

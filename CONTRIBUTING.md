@@ -32,9 +32,9 @@ compiler and check the diagnostics. They pin down how C# unions behave with `Val
 Releases are automated with release-please and published to nuget.org with Trusted Publishing.
 
 1. Every push to `main` updates an open *release PR* with the next version and the changelog. Work is planned in
-   GitHub milestones and issues; the release PR stays open across several milestones and is merged only at the three
-   release points of 1.0 (`1.0.0-alpha.1`, `1.0.0-beta.1`, `1.0.0`).
-2. Merging the release PR tags the commit (`v1.0.0-alpha.1`, ...) and creates a GitHub release.
+   GitHub milestones and issues; the release PR stays open across several milestones and is merged at the release
+   points (1.0 itself came as `1.0.0-alpha.1`, `1.0.0-beta.1` and `1.0.0`).
+2. Merging the release PR tags the commit (`v1.0.0`, ...) and creates a GitHub release.
 3. The `publish` job (environment `release`, needs approval) packs the tagged commit and pushes it to nuget.org.
 
 The package version comes from the git tag through MinVer; nothing else needs editing.
@@ -52,11 +52,11 @@ release with a `Release-As:` footer in the commit body. Pull requests are squash
 message, so the GitHub UI drops footers; merge from the command line instead:
 
 ```bash
-gh pr merge <number> --squash --subject "chore: start beta releases (#<number>)" --body "Release-As: 1.0.0-beta.1"
+gh pr merge <number> --squash --subject "chore: release 1.1.0 (#<number>)" --body "Release-As: 1.1.0"
 ```
 
-Until 1.0.0 the configuration produces pre-releases (`prerelease-type` alpha, then beta); 1.0.0 drops those settings,
-and later versions follow plain semantic versioning (`fix:` → 1.0.1, `feat:` → 1.1.0, a breaking change → 2.0.0).
+Since 1.0.0 the configuration has no pre-release settings: versions follow plain semantic versioning (`fix:` → 1.0.1,
+`feat:` → 1.1.0, a breaking change → 2.0.0).
 
 ## Public API
 
