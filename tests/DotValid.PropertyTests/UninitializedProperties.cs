@@ -137,6 +137,24 @@ public sealed class UninitializedProperties
     }
 
     [Fact]
+    public void Collections_throw_when_they_read_one()
+    {
+        Validated<int, string>[] validations = [Validations.Valid<int, string>(1), Uninitialized];
+        var values = validations.Values();
+        var errors = validations.Errors();
+        var calls = 0;
+
+        Assert.Throws<InvalidOperationException>(() => validations.Sequence());
+        Assert.Throws<InvalidOperationException>(() => validations.Partition());
+        Assert.Throws<InvalidOperationException>(() => values.ToList());
+        Assert.Throws<InvalidOperationException>(() => errors.ToList());
+        var rejected = Assert.Throws<InvalidOperationException>(
+            () => new[] { 1, 2, 3 }.Traverse(_ => ++calls == 2 ? Uninitialized : Validations.Valid<int, string>(calls)));
+        Assert.StartsWith("'selector' returned an uninitialized", rejected.Message, StringComparison.Ordinal);
+        Assert.Equal(2, calls);
+    }
+
+    [Fact]
     public void The_union_members_report_no_case()
     {
         Validated<int, string>.IUnionMembers members = Uninitialized;

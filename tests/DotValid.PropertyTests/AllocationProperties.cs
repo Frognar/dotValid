@@ -13,7 +13,9 @@ namespace DotValid.PropertyTests;
 /// Not covered on purpose: creating an invalid case, mapping its errors or accumulating errors (each builds an array of
 /// errors), <c>Equals(object)</c> (boxes
 /// its argument), and <c>validated is null</c> / <c>is not null</c> on an initialized validation (the compiler reads the
-/// union's <c>Value</c>, which boxes the case). Reading an existing invalid case allocates nothing.
+/// union's <c>Value</c>, which boxes the case). Reading an existing invalid case allocates nothing. Sequences
+/// (<c>Sequence</c>, <c>Traverse</c>, <c>Values</c>, <c>Errors</c>, <c>Partition</c>) allocate like LINQ (enumerators
+/// and the lists they return; see <c>CollectionBenchmarks</c>).
 /// </remarks>
 public sealed class AllocationProperties
 {

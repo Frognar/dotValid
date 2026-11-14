@@ -69,10 +69,15 @@ static DotValid.Validated.Combine<T1, T2, T3, T4, T5, TResult, TError>(DotValid.
 static DotValid.Validated.Combine<T1, T2, T3, T4, TResult, TError>(DotValid.Validated<T1, TError> first, DotValid.Validated<T2, TError> second, DotValid.Validated<T3, TError> third, DotValid.Validated<T4, TError> fourth, System.Func<T1, T2, T3, T4, TResult>! combine) -> DotValid.Validated<TResult, TError>
 static DotValid.Validated.Combine<T1, T2, T3, TResult, TError>(DotValid.Validated<T1, TError> first, DotValid.Validated<T2, TError> second, DotValid.Validated<T3, TError> third, System.Func<T1, T2, T3, TResult>! combine) -> DotValid.Validated<TResult, TError>
 static DotValid.Validated.Combine<T1, T2, TResult, TError>(DotValid.Validated<T1, TError> first, DotValid.Validated<T2, TError> second, System.Func<T1, T2, TResult>! combine) -> DotValid.Validated<TResult, TError>
+static DotValid.Validated.Errors<T, TError>(this System.Collections.Generic.IEnumerable<DotValid.Validated<T, TError>>! source) -> System.Collections.Generic.IEnumerable<TError>!
 static DotValid.Validated.FromNullable<T, TError>(T? value, System.Func<TError>! error) -> DotValid.Validated<T!, TError>
 static DotValid.Validated.FromNullable<T, TError>(T? value, System.Func<TError>! error) -> DotValid.Validated<T, TError>
 static DotValid.Validated.FromNullable<T, TError>(T? value, TError error) -> DotValid.Validated<T!, TError>
 static DotValid.Validated.FromNullable<T, TError>(T? value, TError error) -> DotValid.Validated<T, TError>
+static DotValid.Validated.Partition<T, TError>(this System.Collections.Generic.IEnumerable<DotValid.Validated<T, TError>>! source) -> (System.Collections.Generic.IReadOnlyList<T>! Values, System.Collections.Generic.IReadOnlyList<TError>! Errors)
+static DotValid.Validated.Sequence<T, TError>(this System.Collections.Generic.IEnumerable<DotValid.Validated<T, TError>>! source) -> DotValid.Validated<System.Collections.Generic.IReadOnlyList<T>!, TError>
+static DotValid.Validated.Traverse<T, TResult, TError>(this System.Collections.Generic.IEnumerable<T>! source, System.Func<T, DotValid.Validated<TResult, TError>>! selector) -> DotValid.Validated<System.Collections.Generic.IReadOnlyList<TResult>!, TError>
+static DotValid.Validated.Values<T, TError>(this System.Collections.Generic.IEnumerable<DotValid.Validated<T, TError>>! source) -> System.Collections.Generic.IEnumerable<T>!
 static DotValid.Validated<T, TError>.operator !=(DotValid.Validated<T, TError> left, DotValid.Validated<T, TError> right) -> bool
 static DotValid.Validated<T, TError>.operator ==(DotValid.Validated<T, TError> left, DotValid.Validated<T, TError> right) -> bool
 static DotValid.ValidationError.operator !=(DotValid.ValidationError left, DotValid.ValidationError right) -> bool

@@ -141,6 +141,21 @@ nullable value types and references alike; both also take a function that produc
 be the error, it is there for the common case. There is no rule DSL on purpose: rules are plain functions that return a
 validation.
 
+### Collections
+
+```csharp
+Validated<IReadOnlyList<int>, string> ages = lines.Traverse(Parse);   // every value, or every error of every line
+Validated<IReadOnlyList<int>, string> all = validations.Sequence();    // Validated<int, string>[] -> list or every error
+
+IEnumerable<int> good = validations.Values();                          // lazily
+IEnumerable<string> problems = validations.Errors();                   // lazily, flattened
+var (values, errors) = validations.Partition();                        // both, in one pass
+```
+
+`Sequence` and `Traverse` accumulate like `Combine`: they read the whole sequence and, if anything is invalid, give
+every error of every element in order. As with `Then`, a `Traverse` lambda that returns `valid(...)` or `invalid(...)`
+needs its return type spelled out: `lines.Traverse(Validated<int, string> (line) => ...)`.
+
 ### Dependent steps
 
 ```csharp

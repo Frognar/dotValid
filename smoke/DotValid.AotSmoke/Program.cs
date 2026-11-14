@@ -47,6 +47,12 @@ Check(
     Validated.FromNullable((int?)null, "missing") == invalid("missing")
     && Validated.FromNullable((string?)"text", static () => 0) == valid("text"),
     "FromNullable");
+string[] lines = ["1", "x", "3", "y"];
+Check(lines.Traverse(Parse) == invalid("not a number", "not a number") && lines[..1].Traverse(Parse).Map(static numbers => numbers.Sum()) == valid(1), "Traverse");
+Validated<int, string>[] mixed = [age, failed, Parse("7")];
+Check(mixed.Sequence() == invalid("empty", "too short") && mixed.Values().Sum() == 49 && mixed.Errors().Count() == 2, "Sequence, Values, Errors");
+var (passed, problems) = mixed.Partition();
+Check(passed is [42, 7] && problems is ["empty", "too short"], "Partition");
 
 if (failures.Count > 0)
 {
