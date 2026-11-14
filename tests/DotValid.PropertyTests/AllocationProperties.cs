@@ -10,12 +10,13 @@ namespace DotValid.PropertyTests;
 /// </summary>
 /// <remarks>
 /// Skipped in Debug builds (see <see cref="Allocations.SkipInDebug"/>); CI runs them in Release.
-/// Not covered on purpose: creating an invalid case, mapping its errors or accumulating errors (each builds an array of
-/// errors), <c>Equals(object)</c> (boxes
-/// its argument), and <c>validated is null</c> / <c>is not null</c> on an initialized validation (the compiler reads the
-/// union's <c>Value</c>, which boxes the case). Reading an existing invalid case allocates nothing. Sequences
-/// (<c>Sequence</c>, <c>Traverse</c>, <c>Values</c>, <c>Errors</c>, <c>Partition</c>) allocate like LINQ (enumerators
-/// and the lists they return; see <c>CollectionBenchmarks</c>).
+/// Every public member has a line here or is listed now (V9 audit, M7). Not covered on purpose: <c>ToString</c> (it
+/// builds a string); creating an invalid case, mapping its errors or accumulating errors, including
+/// <c>Ensure</c>/<c>Check</c> when the predicate fails and <c>FromNullable</c> for <see langword="null"/> (each builds
+/// an array of errors); <c>Equals(object)</c> (boxes its argument); <c>validated is null</c> / <c>is not null</c> on an
+/// initialized validation (the compiler reads the union's <c>Value</c>, which boxes the case); and sequences
+/// (<c>Sequence</c>, <c>Traverse</c>, <c>Values</c>, <c>Errors</c>, <c>Partition</c>), which allocate like LINQ (see
+/// <c>CollectionBenchmarks</c>). Reading and comparing an existing invalid case allocates nothing.
 /// </remarks>
 public sealed class AllocationProperties
 {
@@ -92,6 +93,19 @@ public sealed class AllocationProperties
         Allocations.AssertNone("Apply", () => _ = function.Apply(second));
         Allocations.AssertNone("Combine(2)", () => _ = Validated.Combine(validated, second, static (a, b) => a + b));
         Allocations.AssertNone("Combine(3)", () => _ = Validated.Combine(validated, second, validated, static (a, b, c) => a + b + c));
+        Allocations.AssertNone("Combine(4)", () => _ = Validated.Combine(validated, second, validated, second, static (a, b, c, d) => a + b + c + d));
+        Allocations.AssertNone(
+            "Combine(5)",
+            () => _ = Validated.Combine(validated, second, validated, second, validated, static (a, b, c, d, e) => a + b + c + d + e));
+        Allocations.AssertNone(
+            "Combine(6)",
+            () => _ = Validated.Combine(
+                validated, second, validated, second, validated, second, static (a, b, c, d, e, f) => a + b + c + d + e + f));
+        Allocations.AssertNone(
+            "Combine(7)",
+            () => _ = Validated.Combine(
+                validated, second, validated, second, validated, second, validated,
+                static (a, b, c, d, e, f, g) => a + b + c + d + e + f + g));
         Allocations.AssertNone(
             "Combine(8)",
             () => _ = Validated.Combine(
@@ -109,6 +123,7 @@ public sealed class AllocationProperties
         Allocations.AssertNone("FromNullable (present)", () => _ = Validated.FromNullable(present, -1));
         Allocations.AssertNone("FromNullable(factory) (present)", () => _ = Validated.FromNullable(present, static () => -1));
         Allocations.AssertNone("FromNullable (reference)", () => _ = Validated.FromNullable(Text, -1));
+        Allocations.AssertNone("FromNullable(factory) (reference)", () => _ = Validated.FromNullable(Text, static () => -1));
         Allocations.AssertNone("ValidationError", () => _ = new ValidationError("Name", "is empty"));
     }
 
@@ -127,6 +142,28 @@ public sealed class AllocationProperties
             "CombineAsync(2)",
             () => _ = Validated.CombineAsync(CompletedValidOne, CompletedValidOne, static (a, b) => a + b).IsCompleted);
         Allocations.AssertNone(
+            "CombineAsync(3)",
+            () => _ = Validated.CombineAsync(CompletedValidOne, CompletedValidOne, CompletedValidOne, static (a, b, c) => a + b + c).IsCompleted);
+        Allocations.AssertNone(
+            "CombineAsync(4)",
+            () => _ = Validated.CombineAsync(
+                CompletedValidOne, CompletedValidOne, CompletedValidOne, CompletedValidOne, static (a, b, c, d) => a + b + c + d).IsCompleted);
+        Allocations.AssertNone(
+            "CombineAsync(5)",
+            () => _ = Validated.CombineAsync(
+                CompletedValidOne, CompletedValidOne, CompletedValidOne, CompletedValidOne, CompletedValidOne,
+                static (a, b, c, d, e) => a + b + c + d + e).IsCompleted);
+        Allocations.AssertNone(
+            "CombineAsync(6)",
+            () => _ = Validated.CombineAsync(
+                CompletedValidOne, CompletedValidOne, CompletedValidOne, CompletedValidOne, CompletedValidOne, CompletedValidOne,
+                static (a, b, c, d, e, f) => a + b + c + d + e + f).IsCompleted);
+        Allocations.AssertNone(
+            "CombineAsync(7)",
+            () => _ = Validated.CombineAsync(
+                CompletedValidOne, CompletedValidOne, CompletedValidOne, CompletedValidOne, CompletedValidOne, CompletedValidOne,
+                CompletedValidOne, static (a, b, c, d, e, f, g) => a + b + c + d + e + f + g).IsCompleted);
+        Allocations.AssertNone(
             "CombineAsync(8)",
             () => _ = Validated.CombineAsync(
                 CompletedValidOne, CompletedValidOne, CompletedValidOne, CompletedValidOne,
@@ -142,6 +179,41 @@ public sealed class AllocationProperties
         Allocations.AssertNone("!=", () => _ = validated != other);
         Allocations.AssertNone("GetHashCode", () => _ = validated.GetHashCode());
         Allocations.AssertNone("Valid ==", () => _ = new Valid<int>(1) == new Valid<int>(2));
+        Allocations.AssertNone("Valid !=", () => _ = new Valid<int>(1) != new Valid<int>(2));
+        Allocations.AssertNone("Valid Equals", () => _ = new Valid<int>(1).Equals(new Valid<int>(2)));
+        Allocations.AssertNone("Valid GetHashCode", () => _ = new Valid<int>(1).GetHashCode());
+        Allocations.AssertNone("Valid Value and Deconstruct", () =>
+        {
+            var success = new Valid<int>(1);
+            success.Deconstruct(out var value);
+            _ = success.Value + value;
+        });
+    }
+
+    [Property(Skip = Allocations.SkipInDebug)]
+    public void Reading_and_comparing_existing_invalid_cases_allocates_nothing(int first, int second)
+    {
+        var failure = new Invalid<int>(first, second);
+        var other = new Invalid<int>(second);
+        var error = new ValidationError("Name", "is empty");
+        var otherError = new ValidationError("Age", "is negative");
+
+        Allocations.AssertNone("Invalid ==", () => _ = failure == other);
+        Allocations.AssertNone("Invalid !=", () => _ = failure != other);
+        Allocations.AssertNone("Invalid Equals", () => _ = failure.Equals(other));
+        Allocations.AssertNone("Invalid GetHashCode", () => _ = failure.GetHashCode());
+        Allocations.AssertNone("Invalid Errors and Deconstruct", () =>
+        {
+            failure.Deconstruct(out var errors);
+            _ = failure.Errors.Length + errors[0];
+        });
+        Allocations.AssertNone("ValidationError ==", () => _ = error == otherError);
+        Allocations.AssertNone("ValidationError GetHashCode", () => _ = error.GetHashCode());
+        Allocations.AssertNone("ValidationError Deconstruct", () =>
+        {
+            var (property, message) = error;
+            _ = property.Length + message.Length;
+        });
     }
 
     private const string? Text = "text";
