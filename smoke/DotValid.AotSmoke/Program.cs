@@ -63,6 +63,13 @@ var described = await age.MatchAsync(
 Check(described == "valid 42" && await failed.MatchAsync(static _ => Task.FromResult(0), static errors => errors.Length) == 2, "MatchAsync");
 Check(await age.MapAsync(static value => Task.FromResult(value + 1)) == valid(43) && await failed.MapAsync(static value => Task.FromResult(value)) == failed, "MapAsync");
 Check(await Parse("7").ThenAsync(static value => Task.FromResult(Adult(value))) == invalid("too young"), "ThenAsync");
+var remote = await Validated.CombineAsync(
+    Task.FromResult(Parse("x")),
+    Later(invalid("email taken")),
+    Task.FromResult(age),
+    static (a, b, c) => a + b + c);
+Check(remote == invalid("not a number", "email taken"), "CombineAsync accumulates");
+Check(age.Zip(remote, static (a, b) => a + b) == remote, "Zip joins a sync and an async part");
 
 if (failures.Count > 0)
 {
@@ -82,6 +89,12 @@ static string Describe(Validated<int, string> validated) => validated switch
     Valid<int>(var value) => $"valid {value}",
     Invalid<string>(var errors) => $"{errors.Length} errors",
 };
+
+static async Task<Validated<int, string>> Later(Validated<int, string> validated)
+{
+    await Task.Yield();
+    return validated;
+}
 
 static Validated<int, string> Adult(int value) => value >= 18 ? valid(value) : invalid("too young");
 

@@ -123,6 +123,15 @@ public sealed class AllocationProperties
             () => _ = validated.MatchAsync(static _ => CompletedOne, static errors => errors.Length).IsCompleted);
         Allocations.AssertNone("MapAsync", () => _ = validated.MapAsync(static _ => CompletedOne).IsCompleted);
         Allocations.AssertNone("ThenAsync", () => _ = validated.ThenAsync(static _ => CompletedValidOne).IsCompleted);
+        Allocations.AssertNone(
+            "CombineAsync(2)",
+            () => _ = Validated.CombineAsync(CompletedValidOne, CompletedValidOne, static (a, b) => a + b).IsCompleted);
+        Allocations.AssertNone(
+            "CombineAsync(8)",
+            () => _ = Validated.CombineAsync(
+                CompletedValidOne, CompletedValidOne, CompletedValidOne, CompletedValidOne,
+                CompletedValidOne, CompletedValidOne, CompletedValidOne, CompletedValidOne,
+                static (a, b, c, d, e, f, g, h) => a + b + c + d + e + f + g + h).IsCompleted);
     }
 
     [Property(Skip = Allocations.SkipInDebug)]
