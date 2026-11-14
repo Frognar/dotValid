@@ -1,3 +1,4 @@
+using System.Collections.Immutable;
 using System.Diagnostics;
 using System.Runtime.CompilerServices;
 
@@ -108,6 +109,69 @@ public readonly partial struct Validated<T, TError> : Validated<T, TError>.IUnio
         };
 
     /// <summary>
+    /// Reduces this validation to a single value: <paramref name="valid"/> runs on the value of a valid validation,
+    /// <paramref name="invalid"/> runs on the errors of an invalid one. Exactly one of them runs, exactly once.
+    /// </summary>
+    /// <remarks>
+    /// The expression form of <c>validated switch { Valid&lt;T&gt;(var value) => ..., Invalid&lt;TError&gt;(var errors) => ... }</c>,
+    /// convenient in lambdas and chains.
+    /// </remarks>
+    /// <typeparam name="TResult">The type of the value both branches produce.</typeparam>
+    /// <param name="valid">Produces the value from the value of a valid validation.</param>
+    /// <param name="invalid">Produces the value from the errors, in order (never empty).</param>
+    /// <returns>The value produced by the branch that ran.</returns>
+    /// <exception cref="ArgumentNullException"><paramref name="valid"/> or <paramref name="invalid"/> is null.</exception>
+    /// <exception cref="InvalidOperationException">The validation is uninitialized (default).</exception>
+    public TResult Match<TResult>(Func<T, TResult> valid, Func<ImmutableArray<TError>, TResult> invalid)
+    {
+        ArgumentNullException.ThrowIfNull(valid);
+        ArgumentNullException.ThrowIfNull(invalid);
+        return _case switch
+        {
+            ValidatedCase.Valid => valid(_valid.Value),
+            ValidatedCase.Invalid => invalid(_invalid.Errors),
+            _ => throw Uninitialized(),
+        };
+    }
+
+    /// <summary>
+    /// Returns the value of a valid validation, or <paramref name="fallback"/> for an invalid one.
+    /// </summary>
+    /// <param name="fallback">The value to use for an invalid validation.</param>
+    /// <returns>The value or the fallback.</returns>
+    /// <exception cref="ArgumentNullException"><paramref name="fallback"/> is null.</exception>
+    /// <exception cref="InvalidOperationException">The validation is uninitialized (default).</exception>
+    public T OrDefault(T fallback)
+    {
+        ArgumentNullException.ThrowIfNull(fallback);
+        return _case switch
+        {
+            ValidatedCase.Valid => _valid.Value,
+            ValidatedCase.Invalid => fallback,
+            _ => throw Uninitialized(),
+        };
+    }
+
+    /// <summary>
+    /// Returns the value of a valid validation, or the value <paramref name="fallback"/> produces from the errors.
+    /// <paramref name="fallback"/> runs only for an invalid validation.
+    /// </summary>
+    /// <param name="fallback">Produces the value to use from the errors.</param>
+    /// <returns>The value or the produced fallback.</returns>
+    /// <exception cref="ArgumentNullException"><paramref name="fallback"/> is null.</exception>
+    /// <exception cref="InvalidOperationException">The validation is uninitialized (default).</exception>
+    public T OrDefault(Func<ImmutableArray<TError>, T> fallback)
+    {
+        ArgumentNullException.ThrowIfNull(fallback);
+        return _case switch
+        {
+            ValidatedCase.Valid => _valid.Value,
+            ValidatedCase.Invalid => fallback(_invalid.Errors),
+            _ => throw Uninitialized(),
+        };
+    }
+
+    /// <summary>
     /// Compares two validations: both valid with equal values, both invalid with equal errors, or both uninitialized.
     /// </summary>
     /// <param name="left">The first validation.</param>
@@ -161,6 +225,10 @@ public readonly partial struct Validated<T, TError> : Validated<T, TError>.IUnio
             ValidatedCase.Invalid => HashCode.Combine(ValidatedCase.Invalid, _invalid),
             _ => 0,
         };
+
+    // V3: every consuming member rejects the uninitialized default the same way.
+    private static InvalidOperationException Uninitialized() =>
+        new("The validation is uninitialized (default). Create validations with valid(value) or invalid(error).");
 
     /// <summary>
     /// Returns <c>Valid(value)</c> for a valid validation, <c>Invalid([error, ...])</c> for an invalid one, and

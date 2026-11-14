@@ -21,6 +21,9 @@ DotValid.Validated<T, TError>.IUnionMembers.Create(DotValid.Valid<T> value) -> D
 DotValid.Validated<T, TError>.IUnionMembers.TryGetValue(out DotValid.Invalid<TError> value) -> bool
 DotValid.Validated<T, TError>.IUnionMembers.TryGetValue(out DotValid.Valid<T> value) -> bool
 DotValid.Validated<T, TError>.IUnionMembers.Value.get -> object?
+DotValid.Validated<T, TError>.Match<TResult>(System.Func<T, TResult>! valid, System.Func<System.Collections.Immutable.ImmutableArray<TError>, TResult>! invalid) -> TResult
+DotValid.Validated<T, TError>.OrDefault(System.Func<System.Collections.Immutable.ImmutableArray<TError>, T>! fallback) -> T
+DotValid.Validated<T, TError>.OrDefault(T fallback) -> T
 DotValid.Validated<T, TError>.Validated() -> void
 override DotValid.Invalid<TError>.Equals(object? obj) -> bool
 override DotValid.Invalid<TError>.GetHashCode() -> int

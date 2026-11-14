@@ -21,6 +21,10 @@ Check(default(Validated<int, string>) is null && age is not null, "uninitialized
 Check(Throws<ArgumentNullException>(static () => valid<string>(null!)), "null value rejected");
 Check(Throws<ArgumentException>(static () => invalid<string>()), "no errors rejected");
 Check($"{age} {failed} {default(Validated<int, string>)}" == "Valid(42) Invalid([empty, too short]) Uninitialized", "ToString");
+Check(age.Match(static value => value, static errors => -errors.Length) == 42, "Match on Valid");
+Check(failed.Match(static value => value, static errors => -errors.Length) == -2, "Match on Invalid");
+Check(age.OrDefault(0) == 42 && failed.OrDefault(0) == 0 && failed.OrDefault(static errors => errors.Length) == 2, "OrDefault");
+Check(Throws<InvalidOperationException>(static () => default(Validated<int, string>).OrDefault(0)), "uninitialized OrDefault");
 
 if (failures.Count > 0)
 {
