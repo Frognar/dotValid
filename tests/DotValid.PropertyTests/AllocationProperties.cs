@@ -10,7 +10,7 @@ namespace DotValid.PropertyTests;
 /// </summary>
 /// <remarks>
 /// Skipped in Debug builds (see <see cref="Allocations.SkipInDebug"/>); CI runs them in Release.
-/// Not covered on purpose: creating an invalid case (it copies its errors into an array), <c>Equals(object)</c> (boxes
+/// Not covered on purpose: creating an invalid case or mapping its errors (that builds an array of errors), <c>Equals(object)</c> (boxes
 /// its argument), and <c>validated is null</c> / <c>is not null</c> on an initialized validation (the compiler reads the
 /// union's <c>Value</c>, which boxes the case). Reading an existing invalid case allocates nothing.
 /// </remarks>
@@ -61,6 +61,15 @@ public sealed class AllocationProperties
         Allocations.AssertNone("Match", () => _ = validated.Match(static value => value, static errors => -errors.Length));
         Allocations.AssertNone("OrDefault", () => _ = validated.OrDefault(0));
         Allocations.AssertNone("OrDefault(factory)", () => _ = validated.OrDefault(static errors => errors[0]));
+    }
+
+    [Property(Skip = Allocations.SkipInDebug)]
+    public void Transforming_a_valid_validation_allocates_nothing(int value)
+    {
+        var validated = Validations.Valid<int, int>(value);
+
+        Allocations.AssertNone("Map", () => _ = validated.Map(static number => number + 1));
+        Allocations.AssertNone("MapError", () => _ = validated.MapError(static error => (long)error));
     }
 
     [Property(Skip = Allocations.SkipInDebug)]

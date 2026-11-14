@@ -25,6 +25,8 @@ Check(age.Match(static value => value, static errors => -errors.Length) == 42, "
 Check(failed.Match(static value => value, static errors => -errors.Length) == -2, "Match on Invalid");
 Check(age.OrDefault(0) == 42 && failed.OrDefault(0) == 0 && failed.OrDefault(static errors => errors.Length) == 2, "OrDefault");
 Check(Throws<InvalidOperationException>(static () => default(Validated<int, string>).OrDefault(0)), "uninitialized OrDefault");
+Check(age.Map(static value => value * 2) == valid(84) && failed.Map(static value => value * 2) == failed.Map(static value => value), "Map");
+Check(failed.MapError(static error => error.Length) == invalid(5, 9) && age.MapError(static error => error.Length) == valid(42), "MapError");
 
 if (failures.Count > 0)
 {

@@ -172,6 +172,68 @@ public readonly partial struct Validated<T, TError> : Validated<T, TError>.IUnio
     }
 
     /// <summary>
+    /// Transforms the value of a valid validation with <paramref name="map"/>; the errors of an invalid one pass through
+    /// unchanged.
+    /// </summary>
+    /// <remarks><paramref name="map"/> runs only for a valid validation, exactly once.</remarks>
+    /// <typeparam name="TResult">The type of the transformed value.</typeparam>
+    /// <param name="map">Transforms the value.</param>
+    /// <returns>A valid validation with the transformed value, or the same errors.</returns>
+    /// <exception cref="ArgumentNullException"><paramref name="map"/> is null.</exception>
+    /// <exception cref="InvalidOperationException">
+    /// The validation is uninitialized (default), or <paramref name="map"/> returned <see langword="null"/>.
+    /// </exception>
+    public Validated<TResult, TError> Map<TResult>(Func<T, TResult> map)
+        where TResult : notnull
+    {
+        ArgumentNullException.ThrowIfNull(map);
+        return _case switch
+        {
+            ValidatedCase.Valid => new Validated<TResult, TError>(new Valid<TResult>(Produced(map(_valid.Value), nameof(map)))),
+            ValidatedCase.Invalid => new Validated<TResult, TError>(_invalid),
+            _ => throw Uninitialized(),
+        };
+    }
+
+    /// <summary>
+    /// Transforms every error with <paramref name="map"/>, possibly into another type, keeping their order; the value of
+    /// a valid validation passes through unchanged.
+    /// </summary>
+    /// <remarks>
+    /// <paramref name="map"/> runs once per error and never for a valid validation. Use it to translate errors between
+    /// layers, for example from field codes to messages.
+    /// </remarks>
+    /// <typeparam name="TNewError">The type of the transformed errors.</typeparam>
+    /// <param name="map">Transforms one error.</param>
+    /// <returns>The same valid validation, or an invalid one with every error transformed.</returns>
+    /// <exception cref="ArgumentNullException"><paramref name="map"/> is null.</exception>
+    /// <exception cref="InvalidOperationException">
+    /// The validation is uninitialized (default), or <paramref name="map"/> returned <see langword="null"/>.
+    /// </exception>
+    public Validated<T, TNewError> MapError<TNewError>(Func<TError, TNewError> map)
+        where TNewError : notnull
+    {
+        ArgumentNullException.ThrowIfNull(map);
+        return _case switch
+        {
+            ValidatedCase.Valid => new Validated<T, TNewError>(_valid),
+            ValidatedCase.Invalid => new Validated<T, TNewError>(Invalid<TNewError>.FromTrusted(MapErrors(_invalid.Errors, map))),
+            _ => throw Uninitialized(),
+        };
+
+        static ImmutableArray<TNewError> MapErrors(ImmutableArray<TError> errors, Func<TError, TNewError> map)
+        {
+            var mapped = ImmutableArray.CreateBuilder<TNewError>(errors.Length);
+            foreach (var error in errors)
+            {
+                mapped.Add(Produced(map(error), nameof(map)));
+            }
+
+            return mapped.MoveToImmutable();
+        }
+    }
+
+    /// <summary>
     /// Compares two validations: both valid with equal values, both invalid with equal errors, or both uninitialized.
     /// </summary>
     /// <param name="left">The first validation.</param>
@@ -225,6 +287,12 @@ public readonly partial struct Validated<T, TError> : Validated<T, TError>.IUnio
             ValidatedCase.Invalid => HashCode.Combine(ValidatedCase.Invalid, _invalid),
             _ => 0,
         };
+
+    // V4: a delegate never smuggles a null into a validation.
+    internal static TValue Produced<TValue>(TValue value, string producer) =>
+        value is null
+            ? throw new InvalidOperationException($"'{producer}' returned null, which a validation cannot hold.")
+            : value;
 
     // V3: every consuming member rejects the uninitialized default the same way.
     private static InvalidOperationException Uninitialized() =>
