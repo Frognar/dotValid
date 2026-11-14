@@ -20,6 +20,7 @@ Check(age.GetHashCode() == Parse("42").GetHashCode(), "hash codes");
 Check(default(Validated<int, string>) is null && age is not null, "uninitialized validation");
 Check(Throws<ArgumentNullException>(static () => valid<string>(null!)), "null value rejected");
 Check(Throws<ArgumentException>(static () => invalid<string>()), "no errors rejected");
+Check($"{age} {failed} {default(Validated<int, string>)}" == "Valid(42) Invalid([empty, too short]) Uninitialized", "ToString");
 
 if (failures.Count > 0)
 {

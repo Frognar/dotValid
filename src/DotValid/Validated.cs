@@ -161,4 +161,17 @@ public readonly partial struct Validated<T, TError> : Validated<T, TError>.IUnio
             ValidatedCase.Invalid => HashCode.Combine(ValidatedCase.Invalid, _invalid),
             _ => 0,
         };
+
+    /// <summary>
+    /// Returns <c>Valid(value)</c> for a valid validation, <c>Invalid([error, ...])</c> for an invalid one, and
+    /// <c>Uninitialized</c> for <c>default</c>.
+    /// </summary>
+    /// <returns>A text representation of this validation.</returns>
+    public override string ToString() =>
+        _case switch
+        {
+            ValidatedCase.Valid => _valid.ToString(),
+            ValidatedCase.Invalid => _invalid.ToString(),
+            _ => "Uninitialized",
+        };
 }

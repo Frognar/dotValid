@@ -1,3 +1,5 @@
+using System.Diagnostics;
+
 namespace DotValid;
 
 /// <summary>
@@ -5,6 +7,7 @@ namespace DotValid;
 /// <see cref="Validated{T, TError}"/> with the same <typeparamref name="T"/>.
 /// </summary>
 /// <typeparam name="T">The type of the value. Never <see langword="null"/>.</typeparam>
+[DebuggerDisplay("{ToString(),nq}")]
 public readonly struct Valid<T> : IEquatable<Valid<T>>
     where T : notnull
 {
@@ -61,4 +64,10 @@ public readonly struct Valid<T> : IEquatable<Valid<T>>
 
     /// <inheritdoc/>
     public override int GetHashCode() => HashCode.Combine(_value);
+
+    /// <summary>
+    /// Returns <c>Valid(value)</c>.
+    /// </summary>
+    /// <returns>A text representation of this case.</returns>
+    public override string ToString() => $"Valid({_value})";
 }
