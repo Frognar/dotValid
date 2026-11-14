@@ -1,5 +1,26 @@
 # Changelog
 
+## [1.0.0](https://github.com/Frognar/dotValid/compare/v1.0.0-beta.1...v1.0.0) (2026-11-14)
+
+### Highlights
+
+A ground-up rewrite for .NET 11 and C# 15 unions. The 0.5 line is retired; the README has a migration table.
+
+- `Validated<T, TError>` is a C# 15 union with exactly two cases, `Valid<T>` and `Invalid<TError>`: `valid(...)` and
+  `invalid(...)` convert implicitly, a `switch` over both is exhaustive, and an invalid validation is never empty.
+- Every error, not just the first: `Zip`, `Combine` (2–8), `Apply`, `Sequence`, `Traverse` and `CombineAsync` read every
+  input and collect every error in order. The applicative laws are properties.
+- Dependent steps when they are needed: `Then` and `Ensure` short-circuit on purpose (no `Bind`, no `SelectMany`).
+- Any type can be the error; `ValidationError(Property, Message)`, `Validated.Check` and `Validated.FromNullable` cover
+  the common cases. No `.Value` or `IsValid`: values come out through pattern matching, `Match` or `OrDefault`.
+- Async where it pays off: `MatchAsync`, `MapAsync`, `ThenAsync`, and `CombineAsync` for checks that run as tasks.
+- Zero allocations on the valid path for value types (checked on every build); trimming and Native AOT compatible; no
+  dependencies. Requires .NET 11.
+
+### Build System
+
+* prepare the 1.0.0 release ([#43](https://github.com/Frognar/dotValid/issues/43)) ([c8853e8](https://github.com/Frognar/dotValid/commit/c8853e82f4aacabad499c41953ab339725da10b6))
+
 ## [1.0.0-beta.1](https://github.com/Frognar/dotValid/compare/v1.0.0-alpha.1...v1.0.0-beta.1) (2026-11-14)
 
 
