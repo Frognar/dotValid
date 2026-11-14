@@ -5,7 +5,7 @@
   "include-component-in-tag": false,
   "versioning": "prerelease",
   "prerelease": true,
-  "prerelease-type": "alpha",
+  "prerelease-type": "beta",
   "packages": {
     ".": {
       "changelog-path": "CHANGELOG.md"
