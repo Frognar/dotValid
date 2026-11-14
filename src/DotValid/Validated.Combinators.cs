@@ -74,6 +74,23 @@ public readonly partial struct Validated<T, TError>
         return _case == ValidatedCase.Valid;
     }
 
+    // Reads the case for functions outside the struct (collections): the value of a valid validation or the errors of
+    // an invalid one (V3: an uninitialized validation throws).
+    internal bool IsValid([MaybeNullWhen(false)] out T value, out ImmutableArray<TError> errors)
+    {
+        switch (_case)
+        {
+            case ValidatedCase.Valid:
+                (value, errors) = (_valid.Value, default);
+                return true;
+            case ValidatedCase.Invalid:
+                (value, errors) = (default, _invalid.Errors);
+                return false;
+            default:
+                throw Uninitialized();
+        }
+    }
+
     // The errors of an invalid validation; the default (empty) array otherwise.
     internal ImmutableArray<TError> InvalidErrors => _invalid.Errors;
 
