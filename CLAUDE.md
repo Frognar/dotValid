@@ -97,7 +97,7 @@ nested `IUnionMembers` explicitly so it stays out of the public API), `Valid.cs`
 ## Workflow
 
 - Squash-merged PRs; the PR title is a Conventional Commit and the description says `Closes #n`. Versions come from git
-  tags via MinVer. Only three releases are planned (`1.0.0-alpha.1`, `1.0.0-beta.1`, `1.0.0`); release PRs are merged
-  by the maintainer. To force a release without `feat:`/`fix:`/`perf:`, merge with a `Release-As:` footer
+  tags via MinVer (1.0 came as `1.0.0-alpha.1`, `1.0.0-beta.1`, `1.0.0`; since then plain semver). Release PRs are
+  merged by the maintainer, and the public API in `PublicAPI.Shipped.txt` changes only with a major version. To force a release without `feat:`/`fix:`/`perf:`, merge with a `Release-As:` footer
   (`gh pr merge --squash --body "Release-As: x.y.z"`).
 - Cards are built test-first: failing tests plus `NotImplementedException` stubs, then implement until green.
