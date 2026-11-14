@@ -31,8 +31,19 @@ public readonly partial struct Validated<T, TError> : Validated<T, TError>.IUnio
     private readonly Invalid<TError> _invalid;
     private readonly ValidatedCase _case;
 
-    private Validated(ValidatedCase @case, Valid<T> valid, Invalid<TError> invalid) =>
-        (_case, _valid, _invalid) = (@case, valid, invalid);
+    private Validated(Valid<T> valid)
+    {
+        _valid = valid;
+        _invalid = default;
+        _case = ValidatedCase.Valid;
+    }
+
+    private Validated(Invalid<TError> invalid)
+    {
+        _valid = default;
+        _invalid = invalid;
+        _case = ValidatedCase.Invalid;
+    }
 
     /// <summary>
     /// The union members the C# compiler uses for union conversions and pattern matching.
@@ -49,7 +60,10 @@ public readonly partial struct Validated<T, TError> : Validated<T, TError>.IUnio
         /// <param name="value">The valid case.</param>
         /// <returns>The <see cref="Valid{T}"/> case.</returns>
         /// <exception cref="ArgumentException"><paramref name="value"/> is a default <see cref="Valid{T}"/>.</exception>
-        static Validated<T, TError> Create(Valid<T> value) => throw new NotImplementedException();
+        static Validated<T, TError> Create(Valid<T> value) =>
+            value.Value is null
+                ? throw new ArgumentException("A default Valid<T> holds no value; create it with valid(value).", nameof(value))
+                : new Validated<T, TError>(value);
 
         /// <summary>
         /// Creates an invalid <see cref="Validated{T, TError}"/>.
@@ -57,7 +71,12 @@ public readonly partial struct Validated<T, TError> : Validated<T, TError>.IUnio
         /// <param name="value">The invalid case.</param>
         /// <returns>The <see cref="Invalid{TError}"/> case.</returns>
         /// <exception cref="ArgumentException"><paramref name="value"/> is a default <see cref="Invalid{TError}"/>.</exception>
-        static Validated<T, TError> Create(Invalid<TError> value) => throw new NotImplementedException();
+        static Validated<T, TError> Create(Invalid<TError> value) =>
+            value.Errors.IsDefault
+                ? throw new ArgumentException(
+                    "A default Invalid<TError> holds no errors; create it with invalid(error).",
+                    nameof(value))
+                : new Validated<T, TError>(value);
 
         /// <summary>
         /// Gets the current case, boxed: a <see cref="Valid{T}"/> or an <see cref="Invalid{TError}"/>, or
@@ -80,7 +99,13 @@ public readonly partial struct Validated<T, TError> : Validated<T, TError>.IUnio
         bool TryGetValue(out Invalid<TError> value);
     }
 
-    object? IUnionMembers.Value => throw new NotImplementedException();
+    object? IUnionMembers.Value =>
+        _case switch
+        {
+            ValidatedCase.Valid => _valid,
+            ValidatedCase.Invalid => _invalid,
+            _ => null,
+        };
 
     /// <summary>
     /// Compares two validations: both valid with equal values, both invalid with equal errors, or both uninitialized.
@@ -98,9 +123,17 @@ public readonly partial struct Validated<T, TError> : Validated<T, TError>.IUnio
     /// <returns><see langword="true"/> when the validations differ; otherwise <see langword="false"/>.</returns>
     public static bool operator !=(Validated<T, TError> left, Validated<T, TError> right) => !left.Equals(right);
 
-    bool IUnionMembers.TryGetValue(out Valid<T> value) => throw new NotImplementedException();
+    bool IUnionMembers.TryGetValue(out Valid<T> value)
+    {
+        value = _valid;
+        return _case == ValidatedCase.Valid;
+    }
 
-    bool IUnionMembers.TryGetValue(out Invalid<TError> value) => throw new NotImplementedException();
+    bool IUnionMembers.TryGetValue(out Invalid<TError> value)
+    {
+        value = _invalid;
+        return _case == ValidatedCase.Invalid;
+    }
 
     /// <summary>
     /// Determines whether this validation equals <paramref name="other"/>: both valid with equal values, both invalid
