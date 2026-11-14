@@ -1,5 +1,12 @@
 # Changelog
 
+## [1.0.0](https://github.com/Frognar/dotValid/compare/v1.0.0-beta.1...v1.0.0) (2026-11-14)
+
+
+### Build System
+
+* prepare the 1.0.0 release ([#43](https://github.com/Frognar/dotValid/issues/43)) ([c8853e8](https://github.com/Frognar/dotValid/commit/c8853e82f4aacabad499c41953ab339725da10b6))
+
 ## [1.0.0-beta.1](https://github.com/Frognar/dotValid/compare/v1.0.0-alpha.1...v1.0.0-beta.1) (2026-11-14)
 
 
