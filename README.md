@@ -21,7 +21,64 @@ var message = Age(-1) switch
 };
 ```
 
+- **Union types.** `Validated<T, TError>` has exactly two cases, `Valid<T>` and `Invalid<TError>`. Both convert
+  implicitly, and a `switch` that handles both is exhaustive. `Validated<string, string>` is never ambiguous.
+- **Every error, not just the first.** An invalid validation holds one or more errors, in order, and is never empty.
+  Independent validations combine by collecting all their errors (arriving in the 1.0.0 alphas).
+- **No invalid values.** `null` is never a value or an error, and there is no `.Value`, `IsValid` or other accessor
+  that can throw: you get the content out through pattern matching.
+- **No allocations** on the valid path for value types.
+
 The plan for 1.0 is tracked in the [milestones](https://github.com/Frognar/dotValid/milestones).
+
+## Usage
+
+Import the namespace, and `Prelude` for the lower-case `valid` and `invalid`:
+
+```csharp
+using DotValid;
+using static DotValid.Prelude;
+```
+
+### Creating
+
+```csharp
+Validated<string, string> name = valid("Ada");
+Validated<int, string> age = invalid("age is negative");
+Validated<int, string> both = invalid("age is negative", "age is not a whole number");
+Validated<int, string> many = invalid([.. problems]);           // a collection goes in with a spread
+
+Validated<int, string> Parse(string text) =>
+    int.TryParse(text, out var number) ? valid(number) : invalid($"'{text}' is not a number");
+```
+
+`valid` and `invalid` create the cases; they convert to any `Validated` with a matching type, so the same `valid(42)`
+works for `Validated<int, string>` and `Validated<int, ValidationError>`. There is no conversion from a bare value or
+error. `null` is rejected with `ArgumentNullException`, and `invalid` with no errors with `ArgumentException`. Pass a
+collection with a spread: `invalid(problems)` would make the whole collection a single error, which the compiler then
+rejects.
+
+### Getting values out
+
+```csharp
+var message = Parse(text) switch
+{
+    Valid<int>(var number) => $"parsed {number}",
+    Invalid<string>(var errors) => string.Join("; ", errors),   // errors: ImmutableArray<string>, never empty
+};
+
+if (Parse(text) is Valid<int>(var number) && number > 0) { /* ... */ }
+```
+
+A `switch` over both cases is exhaustive. The errors come in the order they were added. `ToString()` gives
+`Valid(42)` or `Invalid([first, second])`, also in the debugger.
+
+### The uninitialized validation
+
+`Validated<T, TError>` is a struct, so `default(Validated<T, TError>)` exists, for example in a new array. It is
+neither case: a `switch` over both cases throws `SwitchExpressionException`, and every operation that reads it throws
+`InvalidOperationException`. Equality, hashing and `ToString()` (`Uninitialized`) still work, and `validated is null`
+is `true` only for an uninitialized validation. Always create validations with `valid` or `invalid`.
 
 ## Requirements
 

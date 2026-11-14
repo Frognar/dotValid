@@ -1,4 +1,6 @@
 using System.Collections.Immutable;
+using System.Diagnostics;
+using System.Text;
 
 namespace DotValid;
 
@@ -7,6 +9,7 @@ namespace DotValid;
 /// to any <see cref="Validated{T, TError}"/> with the same <typeparamref name="TError"/>.
 /// </summary>
 /// <typeparam name="TError">The type of the errors. Never <see langword="null"/>.</typeparam>
+[DebuggerDisplay("{ToString(),nq}")]
 public readonly struct Invalid<TError> : IEquatable<Invalid<TError>>
     where TError : notnull
 {
@@ -101,5 +104,27 @@ public readonly struct Invalid<TError> : IEquatable<Invalid<TError>>
         }
 
         return hash.ToHashCode();
+    }
+
+    /// <summary>
+    /// Returns <c>Invalid([error, ...])</c> with every error in order.
+    /// </summary>
+    /// <returns>A text representation of this case.</returns>
+    public override string ToString()
+    {
+        // Through the span: a default case reads as no errors instead of throwing.
+        var errors = _errors.AsSpan();
+        var text = new StringBuilder("Invalid([");
+        for (var index = 0; index < errors.Length; index++)
+        {
+            if (index > 0)
+            {
+                text.Append(", ");
+            }
+
+            text.Append(errors[index]);
+        }
+
+        return text.Append("])").ToString();
     }
 }

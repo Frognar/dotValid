@@ -24,10 +24,13 @@ DotValid.Validated<T, TError>.IUnionMembers.Value.get -> object?
 DotValid.Validated<T, TError>.Validated() -> void
 override DotValid.Invalid<TError>.Equals(object? obj) -> bool
 override DotValid.Invalid<TError>.GetHashCode() -> int
+override DotValid.Invalid<TError>.ToString() -> string!
 override DotValid.Valid<T>.Equals(object? obj) -> bool
 override DotValid.Valid<T>.GetHashCode() -> int
+override DotValid.Valid<T>.ToString() -> string!
 override DotValid.Validated<T, TError>.Equals(object? obj) -> bool
 override DotValid.Validated<T, TError>.GetHashCode() -> int
+override DotValid.Validated<T, TError>.ToString() -> string!
 static DotValid.Invalid<TError>.operator !=(DotValid.Invalid<TError> left, DotValid.Invalid<TError> right) -> bool
 static DotValid.Invalid<TError>.operator ==(DotValid.Invalid<TError> left, DotValid.Invalid<TError> right) -> bool
 static DotValid.Prelude.invalid<TError>(params System.ReadOnlySpan<TError> errors) -> DotValid.Invalid<TError>
