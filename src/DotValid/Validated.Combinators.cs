@@ -1,3 +1,6 @@
+using System.Collections.Immutable;
+using System.Diagnostics.CodeAnalysis;
+
 namespace DotValid;
 
 /// <content>
@@ -62,6 +65,33 @@ public readonly partial struct Validated<T, TError>
                 Invalid<TError>.FromTrusted(_invalid.Errors.AddRange(other._invalid.Errors))),
             _ => throw Uninitialized(),
         };
+    }
+
+    // The value of a valid validation, for the static combinators (Combine); call after RejectUninitialized.
+    internal bool TryGetValid([MaybeNullWhen(false)] out T value)
+    {
+        value = _valid.Value;
+        return _case == ValidatedCase.Valid;
+    }
+
+    // The errors of an invalid validation; the default (empty) array otherwise.
+    internal ImmutableArray<TError> InvalidErrors => _invalid.Errors;
+
+    internal static Validated<T, TError> FromValue(T value) => new(new Valid<T>(value));
+
+    // Every error of the inputs that have some, in argument order; at least one input must be invalid.
+    internal static Validated<T, TError> FromErrors(params ReadOnlySpan<ImmutableArray<TError>> errors)
+    {
+        var all = ImmutableArray.CreateBuilder<TError>();
+        foreach (var some in errors)
+        {
+            if (!some.IsDefault)
+            {
+                all.AddRange(some);
+            }
+        }
+
+        return new(Invalid<TError>.FromTrusted(all.ToImmutable()));
     }
 
     // An argument that is itself a validation must be initialized (V3); checked without boxing, unlike `is null`.

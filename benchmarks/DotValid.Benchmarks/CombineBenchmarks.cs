@@ -1,11 +1,12 @@
 using BenchmarkDotNet.Attributes;
+using static DotValid.Prelude;
 
 namespace DotValid.Benchmarks;
 
 /// <summary>
-/// Validating a small form (three fields) and collecting every error, written by hand with ifs and a list of errors.
-/// The validation-based versions arrive with <c>Combine</c> (TP-07). <see cref="InvalidPercent"/> is the share of
-/// forms with at least one invalid field.
+/// Validating a small form (three fields) and collecting every error: by hand with ifs and a list of errors (baseline),
+/// and with <c>Validated.Combine</c>. <see cref="InvalidPercent"/> is the share of forms with every field invalid. V9: a
+/// valid form allocates nothing with <c>Combine</c>; an invalid one allocates its errors, as the list does.
 /// </summary>
 [MemoryDiagnoser]
 public class CombineBenchmarks
@@ -49,4 +50,23 @@ public class CombineBenchmarks
 
         return valid;
     }
+
+    [Benchmark]
+    public int Combine()
+    {
+        var valid = 0;
+        foreach (var (name, age, email) in _forms)
+        {
+            valid += Validated.Combine(Name(name), Age(age), Email(email), static (_, _, _) => 1).OrDefault(0);
+        }
+
+        return valid;
+    }
+
+    private static Validated<string, string> Name(string name) => name.Length > 0 ? valid(name) : invalid("name is empty");
+
+    private static Validated<int, string> Age(int age) => age >= 0 ? valid(age) : invalid("age is negative");
+
+    private static Validated<string, string> Email(string email) =>
+        email.Contains('@', StringComparison.Ordinal) ? valid(email) : invalid("email has no @");
 }

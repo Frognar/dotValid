@@ -35,6 +35,10 @@ Check(age.Zip(Parse("7")) == valid((42, 7)) && name.Zip(failed) == invalid("name
 Check(name.Zip(age, static (n, a) => $"{n} {a}") == invalid("name is empty"), "Zip(combine)");
 Validated<Func<int, int>, string> twice = valid<Func<int, int>>(static value => value * 2);
 Check(twice.Apply(age) == valid(84) && twice.Apply(failed) == failed, "Apply");
+Check(
+    Validated.Combine(name, age, failed, static (n, a, f) => $"{n} {a} {f}") == invalid("name is empty", "empty", "too short")
+    && Validated.Combine(age, age, age, static (a, b, c) => a + b + c) == valid(126),
+    "Combine");
 
 if (failures.Count > 0)
 {
