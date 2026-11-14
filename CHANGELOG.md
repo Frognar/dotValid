@@ -1,5 +1,20 @@
 # Changelog
 
+## [1.0.0-beta.1](https://github.com/Frognar/dotValid/compare/v1.0.0-alpha.1...v1.0.0-beta.1) (2026-11-14)
+
+
+### Features
+
+* add Check, FromNullable and ValidationError ([#33](https://github.com/Frognar/dotValid/issues/33)) ([fad47b6](https://github.com/Frognar/dotValid/commit/fad47b6dfd613660b13600d7e4b33d21de660704))
+* add CombineAsync ([#37](https://github.com/Frognar/dotValid/issues/37)) ([e4e92e2](https://github.com/Frognar/dotValid/commit/e4e92e2e4a98cb3659b4425002d1e03d598810a2))
+* add MatchAsync, MapAsync and ThenAsync ([#36](https://github.com/Frognar/dotValid/issues/36)) ([4395635](https://github.com/Frognar/dotValid/commit/43956355e7cd500372179ea7a03dace78fe3d34e))
+* add Sequence, Traverse and Partition ([#35](https://github.com/Frognar/dotValid/issues/35)) ([4cdac18](https://github.com/Frognar/dotValid/commit/4cdac1867070713f9064f9540771b51b77d5786d))
+
+
+### Miscellaneous Chores
+
+* start beta releases ([#38](https://github.com/Frognar/dotValid/issues/38)) ([935953f](https://github.com/Frognar/dotValid/commit/935953ffb19c12187d91d0072235d30d7c0936e1))
+
 ## [1.0.0-alpha.1](https://github.com/Frognar/dotValid/compare/v1.0.0-alpha.0...v1.0.0-alpha.1) (2026-11-14)
 
 
