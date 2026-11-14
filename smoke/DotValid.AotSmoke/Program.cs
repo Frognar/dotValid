@@ -27,6 +27,9 @@ Check(age.OrDefault(0) == 42 && failed.OrDefault(0) == 0 && failed.OrDefault(sta
 Check(Throws<InvalidOperationException>(static () => default(Validated<int, string>).OrDefault(0)), "uninitialized OrDefault");
 Check(age.Map(static value => value * 2) == valid(84) && failed.Map(static value => value * 2) == failed.Map(static value => value), "Map");
 Check(failed.MapError(static error => error.Length) == invalid(5, 9) && age.MapError(static error => error.Length) == valid(42), "MapError");
+Check(Parse("20").Then(Adult) == valid(20) && Parse("7").Then(Adult) == invalid("too young") && failed.Then(Adult) == failed, "Then");
+Check(age.Ensure(static value => value > 100, "too small") == invalid("too small") && age.Ensure(static value => value > 0, "never") == age, "Ensure");
+Check((from value in age select value + 1) == valid(43), "query syntax");
 
 if (failures.Count > 0)
 {
@@ -46,6 +49,8 @@ static string Describe(Validated<int, string> validated) => validated switch
     Valid<int>(var value) => $"valid {value}",
     Invalid<string>(var errors) => $"{errors.Length} errors",
 };
+
+static Validated<int, string> Adult(int value) => value >= 18 ? valid(value) : invalid("too young");
 
 static Validated<int, string> Parse(string text) =>
     int.TryParse(text, out var number) ? valid(number) : invalid("not a number");

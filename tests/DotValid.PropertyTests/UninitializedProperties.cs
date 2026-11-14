@@ -102,6 +102,18 @@ public sealed class UninitializedProperties
     }
 
     [Fact]
+    public void Then_Ensure_and_Select_throw_and_run_nothing()
+    {
+        var calls = 0;
+
+        Assert.Throws<InvalidOperationException>(() => Uninitialized.Then(value => Validations.Valid<int, string>(++calls)));
+        Assert.Throws<InvalidOperationException>(() => Uninitialized.Ensure(_ => ++calls > 0, "error"));
+        Assert.Throws<InvalidOperationException>(() => Uninitialized.Ensure(_ => ++calls > 0, _ => $"{++calls}"));
+        Assert.Throws<InvalidOperationException>(() => Uninitialized.Select(value => ++calls + value));
+        Assert.Equal(0, calls);
+    }
+
+    [Fact]
     public void The_union_members_report_no_case()
     {
         Validated<int, string>.IUnionMembers members = Uninitialized;

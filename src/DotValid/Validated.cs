@@ -234,6 +234,114 @@ public readonly partial struct Validated<T, TError> : Validated<T, TError>.IUnio
     }
 
     /// <summary>
+    /// Continues a valid validation with <paramref name="next"/>, a step that depends on the value and may itself be
+    /// invalid; an invalid validation stops the chain and passes its errors through unchanged.
+    /// </summary>
+    /// <remarks>
+    /// <para>
+    /// <paramref name="next"/> runs only for a valid validation, exactly once. Use it for checks that need the value,
+    /// for example parsing a number and then checking its range.
+    /// </para>
+    /// <para>
+    /// <c>Then</c> short-circuits like a monadic bind, so it never accumulates errors; that is why it is not called
+    /// <c>Bind</c>. To collect the errors of independent validations, combine them with <c>Zip</c> or <c>Combine</c>.
+    /// </para>
+    /// </remarks>
+    /// <typeparam name="TResult">The type of the value produced by the next step.</typeparam>
+    /// <param name="next">The next step.</param>
+    /// <returns>The validation produced by the next step, or the same errors.</returns>
+    /// <exception cref="ArgumentNullException"><paramref name="next"/> is null.</exception>
+    /// <exception cref="InvalidOperationException">
+    /// The validation is uninitialized (default), or <paramref name="next"/> returned an uninitialized validation.
+    /// </exception>
+    public Validated<TResult, TError> Then<TResult>(Func<T, Validated<TResult, TError>> next)
+        where TResult : notnull
+    {
+        ArgumentNullException.ThrowIfNull(next);
+        return _case switch
+        {
+            ValidatedCase.Valid => Validated<TResult, TError>.Initialized(next(_valid.Value), nameof(next)),
+            ValidatedCase.Invalid => new Validated<TResult, TError>(_invalid),
+            _ => throw Uninitialized(),
+        };
+    }
+
+    /// <summary>
+    /// Keeps a valid validation only when its value satisfies <paramref name="predicate"/>; otherwise it becomes invalid
+    /// with <paramref name="error"/>. An invalid validation passes through unchanged.
+    /// </summary>
+    /// <remarks>
+    /// The validation counterpart of a filter, and the replacement for <c>where</c>, which has no error to give.
+    /// <paramref name="predicate"/> runs only for a valid validation, exactly once.
+    /// </remarks>
+    /// <param name="predicate">The condition the value must satisfy.</param>
+    /// <param name="error">The error when the value does not satisfy <paramref name="predicate"/>.</param>
+    /// <returns>This validation, or an invalid one with <paramref name="error"/>.</returns>
+    /// <exception cref="ArgumentNullException"><paramref name="predicate"/> or <paramref name="error"/> is null.</exception>
+    /// <exception cref="InvalidOperationException">The validation is uninitialized (default).</exception>
+    public Validated<T, TError> Ensure(Func<T, bool> predicate, TError error)
+    {
+        ArgumentNullException.ThrowIfNull(predicate);
+        ArgumentNullException.ThrowIfNull(error);
+        return _case switch
+        {
+            ValidatedCase.Valid => predicate(_valid.Value) ? this : new Validated<T, TError>(new Invalid<TError>(error)),
+            ValidatedCase.Invalid => this,
+            _ => throw Uninitialized(),
+        };
+    }
+
+    /// <summary>
+    /// Keeps a valid validation only when its value satisfies <paramref name="predicate"/>; otherwise it becomes invalid
+    /// with the error <paramref name="error"/> produces from the value. An invalid validation passes through unchanged.
+    /// </summary>
+    /// <remarks>
+    /// <paramref name="predicate"/> runs only for a valid validation, exactly once; <paramref name="error"/> runs only
+    /// when it fails.
+    /// </remarks>
+    /// <param name="predicate">The condition the value must satisfy.</param>
+    /// <param name="error">Produces the error from the value that does not satisfy <paramref name="predicate"/>.</param>
+    /// <returns>This validation, or an invalid one with the produced error.</returns>
+    /// <exception cref="ArgumentNullException"><paramref name="predicate"/> or <paramref name="error"/> is null.</exception>
+    /// <exception cref="InvalidOperationException">
+    /// The validation is uninitialized (default), or <paramref name="error"/> returned <see langword="null"/>.
+    /// </exception>
+    public Validated<T, TError> Ensure(Func<T, bool> predicate, Func<T, TError> error)
+    {
+        ArgumentNullException.ThrowIfNull(predicate);
+        ArgumentNullException.ThrowIfNull(error);
+        return _case switch
+        {
+            ValidatedCase.Valid => predicate(_valid.Value)
+                ? this
+                : new Validated<T, TError>(new Invalid<TError>(Produced(error(_valid.Value), nameof(error)))),
+            ValidatedCase.Invalid => this,
+            _ => throw Uninitialized(),
+        };
+    }
+
+    /// <summary>
+    /// Query-syntax name for <see cref="Map{TResult}"/>: <c>from value in validated select f(value)</c>.
+    /// </summary>
+    /// <remarks>
+    /// There is deliberately no <c>SelectMany</c>: a second <c>from</c> would stop at the first invalid validation
+    /// instead of collecting errors. Use <see cref="Then{TResult}"/> for dependent steps.
+    /// </remarks>
+    /// <typeparam name="TResult">The type of the selected value.</typeparam>
+    /// <param name="selector">Transforms the value.</param>
+    /// <returns>A valid validation with the selected value, or the same errors.</returns>
+    /// <exception cref="ArgumentNullException"><paramref name="selector"/> is null.</exception>
+    /// <exception cref="InvalidOperationException">
+    /// The validation is uninitialized (default), or <paramref name="selector"/> returned <see langword="null"/>.
+    /// </exception>
+    public Validated<TResult, TError> Select<TResult>(Func<T, TResult> selector)
+        where TResult : notnull
+    {
+        ArgumentNullException.ThrowIfNull(selector);
+        return Map(selector);
+    }
+
+    /// <summary>
     /// Compares two validations: both valid with equal values, both invalid with equal errors, or both uninitialized.
     /// </summary>
     /// <param name="left">The first validation.</param>
@@ -293,6 +401,12 @@ public readonly partial struct Validated<T, TError> : Validated<T, TError>.IUnio
         value is null
             ? throw new InvalidOperationException($"'{producer}' returned null, which a validation cannot hold.")
             : value;
+
+    // V3: no operation produces an uninitialized validation, even when a delegate returns one.
+    internal static Validated<T, TError> Initialized(Validated<T, TError> validated, string producer) =>
+        validated._case == ValidatedCase.Uninitialized
+            ? throw new InvalidOperationException($"'{producer}' returned an uninitialized (default) validation.")
+            : validated;
 
     // V3: every consuming member rejects the uninitialized default the same way.
     private static InvalidOperationException Uninitialized() =>
