@@ -39,6 +39,14 @@ Check(
     Validated.Combine(name, age, failed, static (n, a, f) => $"{n} {a} {f}") == invalid("name is empty", "empty", "too short")
     && Validated.Combine(age, age, age, static (a, b, c) => a + b + c) == valid(126),
     "Combine");
+Check(
+    Validated.Check(-1, static value => value >= 0, new ValidationError("Age", "is negative")).ToString() == "Invalid([Age: is negative])"
+    && Validated.Check(5, static value => value >= 0, static value => $"{value}") == valid(5),
+    "Check and ValidationError");
+Check(
+    Validated.FromNullable((int?)null, "missing") == invalid("missing")
+    && Validated.FromNullable((string?)"text", static () => 0) == valid("text"),
+    "FromNullable");
 
 if (failures.Count > 0)
 {

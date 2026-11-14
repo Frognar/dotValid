@@ -31,4 +31,131 @@ public static partial class Validated
         where TResult : notnull
         where TError : notnull =>
         function.ZipWith(argument, static (apply, value) => apply(value), nameof(argument), nameof(function));
+
+    /// <summary>
+    /// A validation of <paramref name="value"/>: valid when it satisfies <paramref name="predicate"/>; otherwise invalid
+    /// with <paramref name="error"/>.
+    /// </summary>
+    /// <remarks>The building block for rules: <c>Validated.Check(age, a => a >= 0, "age is negative")</c>.</remarks>
+    /// <typeparam name="T">The type of the value.</typeparam>
+    /// <typeparam name="TError">The type of the error.</typeparam>
+    /// <param name="value">The value to check.</param>
+    /// <param name="predicate">The condition the value must satisfy.</param>
+    /// <param name="error">The error when it does not.</param>
+    /// <returns>A valid validation of <paramref name="value"/>, or an invalid one with <paramref name="error"/>.</returns>
+    /// <exception cref="ArgumentNullException">An argument is null.</exception>
+    public static Validated<T, TError> Check<T, TError>(T value, Func<T, bool> predicate, TError error)
+        where T : notnull
+        where TError : notnull
+    {
+        ArgumentNullException.ThrowIfNull(value);
+        ArgumentNullException.ThrowIfNull(predicate);
+        ArgumentNullException.ThrowIfNull(error);
+        return predicate(value) ? Validated<T, TError>.FromValue(value) : Validated<T, TError>.FromError(error);
+    }
+
+    /// <summary>
+    /// A validation of <paramref name="value"/>: valid when it satisfies <paramref name="predicate"/>; otherwise invalid
+    /// with the error <paramref name="error"/> produces from the value.
+    /// </summary>
+    /// <remarks><paramref name="error"/> runs only when <paramref name="predicate"/> fails.</remarks>
+    /// <typeparam name="T">The type of the value.</typeparam>
+    /// <typeparam name="TError">The type of the error.</typeparam>
+    /// <param name="value">The value to check.</param>
+    /// <param name="predicate">The condition the value must satisfy.</param>
+    /// <param name="error">Produces the error from the value that does not satisfy <paramref name="predicate"/>.</param>
+    /// <returns>A valid validation of <paramref name="value"/>, or an invalid one with the produced error.</returns>
+    /// <exception cref="ArgumentNullException">An argument is null.</exception>
+    /// <exception cref="InvalidOperationException"><paramref name="error"/> returned <see langword="null"/>.</exception>
+    public static Validated<T, TError> Check<T, TError>(T value, Func<T, bool> predicate, Func<T, TError> error)
+        where T : notnull
+        where TError : notnull
+    {
+        ArgumentNullException.ThrowIfNull(value);
+        ArgumentNullException.ThrowIfNull(predicate);
+        ArgumentNullException.ThrowIfNull(error);
+        return predicate(value)
+            ? Validated<T, TError>.FromValue(value)
+            : Validated<T, TError>.FromError(Validated<T, TError>.Produced(error(value), nameof(error)));
+    }
+
+    /// <summary>
+    /// A validation of a nullable value type: valid with the value, or invalid with <paramref name="error"/> for
+    /// <see langword="null"/>.
+    /// </summary>
+    /// <typeparam name="T">The value type.</typeparam>
+    /// <typeparam name="TError">The type of the error.</typeparam>
+    /// <param name="value">The nullable value.</param>
+    /// <param name="error">The error when <paramref name="value"/> is <see langword="null"/>.</param>
+    /// <returns>A valid validation with the value, or an invalid one with <paramref name="error"/>.</returns>
+    /// <exception cref="ArgumentNullException"><paramref name="error"/> is null.</exception>
+    public static Validated<T, TError> FromNullable<T, TError>(T? value, TError error)
+        where T : struct
+        where TError : notnull
+    {
+        ArgumentNullException.ThrowIfNull(error);
+        return value.HasValue ? Validated<T, TError>.FromValue(value.Value) : Validated<T, TError>.FromError(error);
+    }
+
+    /// <summary>
+    /// A validation of a nullable value type: valid with the value, or invalid with the error <paramref name="error"/>
+    /// produces for <see langword="null"/>.
+    /// </summary>
+    /// <remarks><paramref name="error"/> runs only for <see langword="null"/>, exactly once.</remarks>
+    /// <typeparam name="T">The value type.</typeparam>
+    /// <typeparam name="TError">The type of the error.</typeparam>
+    /// <param name="value">The nullable value.</param>
+    /// <param name="error">Produces the error when <paramref name="value"/> is <see langword="null"/>.</param>
+    /// <returns>A valid validation with the value, or an invalid one with the produced error.</returns>
+    /// <exception cref="ArgumentNullException"><paramref name="error"/> is null.</exception>
+    /// <exception cref="InvalidOperationException"><paramref name="error"/> returned <see langword="null"/>.</exception>
+    public static Validated<T, TError> FromNullable<T, TError>(T? value, Func<TError> error)
+        where T : struct
+        where TError : notnull
+    {
+        ArgumentNullException.ThrowIfNull(error);
+        return value.HasValue
+            ? Validated<T, TError>.FromValue(value.Value)
+            : Validated<T, TError>.FromError(Validated<T, TError>.Produced(error(), nameof(error)));
+    }
+
+    /// <summary>
+    /// A validation of a nullable reference: valid with the reference, or invalid with <paramref name="error"/> for
+    /// <see langword="null"/>.
+    /// </summary>
+    /// <typeparam name="T">The reference type.</typeparam>
+    /// <typeparam name="TError">The type of the error.</typeparam>
+    /// <param name="value">The nullable reference.</param>
+    /// <param name="error">The error when <paramref name="value"/> is <see langword="null"/>.</param>
+    /// <returns>A valid validation with the reference, or an invalid one with <paramref name="error"/>.</returns>
+    /// <exception cref="ArgumentNullException"><paramref name="error"/> is null.</exception>
+    public static Validated<T, TError> FromNullable<T, TError>(T? value, TError error)
+        where T : class
+        where TError : notnull
+    {
+        ArgumentNullException.ThrowIfNull(error);
+        return value is not null ? Validated<T, TError>.FromValue(value) : Validated<T, TError>.FromError(error);
+    }
+
+    /// <summary>
+    /// A validation of a nullable reference: valid with the reference, or invalid with the error
+    /// <paramref name="error"/> produces for <see langword="null"/>.
+    /// </summary>
+    /// <remarks><paramref name="error"/> runs only for <see langword="null"/>, exactly once.</remarks>
+    /// <typeparam name="T">The reference type.</typeparam>
+    /// <typeparam name="TError">The type of the error.</typeparam>
+    /// <param name="value">The nullable reference.</param>
+    /// <param name="error">Produces the error when <paramref name="value"/> is <see langword="null"/>.</param>
+    /// <returns>A valid validation with the reference, or an invalid one with the produced error.</returns>
+    /// <exception cref="ArgumentNullException"><paramref name="error"/> is null.</exception>
+    /// <exception cref="InvalidOperationException"><paramref name="error"/> returned <see langword="null"/>.</exception>
+    public static Validated<T, TError> FromNullable<T, TError>(T? value, Func<TError> error)
+        where T : class
+        where TError : notnull
+    {
+        ArgumentNullException.ThrowIfNull(error);
+        return value is not null
+            ? Validated<T, TError>.FromValue(value)
+            : Validated<T, TError>.FromError(Validated<T, TError>.Produced(error(), nameof(error)));
+    }
 }

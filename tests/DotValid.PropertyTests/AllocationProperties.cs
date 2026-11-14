@@ -98,6 +98,19 @@ public sealed class AllocationProperties
     }
 
     [Property(Skip = Allocations.SkipInDebug)]
+    public void Building_blocks_on_the_valid_path_allocate_nothing(int value)
+    {
+        int? present = value;
+
+        Allocations.AssertNone("Check (passes)", () => _ = Validated.Check(value, static _ => true, -1));
+        Allocations.AssertNone("Check(factory) (passes)", () => _ = Validated.Check(value, static _ => true, static number => -number));
+        Allocations.AssertNone("FromNullable (present)", () => _ = Validated.FromNullable(present, -1));
+        Allocations.AssertNone("FromNullable(factory) (present)", () => _ = Validated.FromNullable(present, static () => -1));
+        Allocations.AssertNone("FromNullable (reference)", () => _ = Validated.FromNullable(Text, -1));
+        Allocations.AssertNone("ValidationError", () => _ = new ValidationError("Name", "is empty"));
+    }
+
+    [Property(Skip = Allocations.SkipInDebug)]
     public void Comparing_allocates_nothing(Validated<int, int> validated, Validated<int, int> other)
     {
         Allocations.AssertNone("Equals", () => _ = validated.Equals(other));
@@ -106,6 +119,8 @@ public sealed class AllocationProperties
         Allocations.AssertNone("GetHashCode", () => _ = validated.GetHashCode());
         Allocations.AssertNone("Valid ==", () => _ = new Valid<int>(1) == new Valid<int>(2));
     }
+
+    private const string? Text = "text";
 
     private static Validated<int, int> Succeed(int value) => valid(value);
 

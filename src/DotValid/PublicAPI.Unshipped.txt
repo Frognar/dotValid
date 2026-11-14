@@ -34,6 +34,13 @@ DotValid.Validated<T, TError>.Then<TResult>(System.Func<T, DotValid.Validated<TR
 DotValid.Validated<T, TError>.Validated() -> void
 DotValid.Validated<T, TError>.Zip<TOther, TResult>(DotValid.Validated<TOther, TError> other, System.Func<T, TOther, TResult>! combine) -> DotValid.Validated<TResult, TError>
 DotValid.Validated<T, TError>.Zip<TOther>(DotValid.Validated<TOther, TError> other) -> DotValid.Validated<(T, TOther), TError>
+DotValid.ValidationError
+DotValid.ValidationError.Deconstruct(out string! Property, out string! Message) -> void
+DotValid.ValidationError.Equals(DotValid.ValidationError other) -> bool
+DotValid.ValidationError.Message.get -> string!
+DotValid.ValidationError.Property.get -> string!
+DotValid.ValidationError.ValidationError() -> void
+DotValid.ValidationError.ValidationError(string! Property, string! Message) -> void
 override DotValid.Invalid<TError>.Equals(object? obj) -> bool
 override DotValid.Invalid<TError>.GetHashCode() -> int
 override DotValid.Invalid<TError>.ToString() -> string!
@@ -43,6 +50,8 @@ override DotValid.Valid<T>.ToString() -> string!
 override DotValid.Validated<T, TError>.Equals(object? obj) -> bool
 override DotValid.Validated<T, TError>.GetHashCode() -> int
 override DotValid.Validated<T, TError>.ToString() -> string!
+override DotValid.ValidationError.GetHashCode() -> int
+override DotValid.ValidationError.ToString() -> string!
 static DotValid.Invalid<TError>.operator !=(DotValid.Invalid<TError> left, DotValid.Invalid<TError> right) -> bool
 static DotValid.Invalid<TError>.operator ==(DotValid.Invalid<TError> left, DotValid.Invalid<TError> right) -> bool
 static DotValid.Prelude.invalid<TError>(params System.ReadOnlySpan<TError> errors) -> DotValid.Invalid<TError>
@@ -51,6 +60,8 @@ static DotValid.Prelude.valid<T>(T value) -> DotValid.Valid<T>
 static DotValid.Valid<T>.operator !=(DotValid.Valid<T> left, DotValid.Valid<T> right) -> bool
 static DotValid.Valid<T>.operator ==(DotValid.Valid<T> left, DotValid.Valid<T> right) -> bool
 static DotValid.Validated.Apply<T, TResult, TError>(this DotValid.Validated<System.Func<T, TResult>!, TError> function, DotValid.Validated<T, TError> argument) -> DotValid.Validated<TResult, TError>
+static DotValid.Validated.Check<T, TError>(T value, System.Func<T, bool>! predicate, System.Func<T, TError>! error) -> DotValid.Validated<T, TError>
+static DotValid.Validated.Check<T, TError>(T value, System.Func<T, bool>! predicate, TError error) -> DotValid.Validated<T, TError>
 static DotValid.Validated.Combine<T1, T2, T3, T4, T5, T6, T7, T8, TResult, TError>(DotValid.Validated<T1, TError> first, DotValid.Validated<T2, TError> second, DotValid.Validated<T3, TError> third, DotValid.Validated<T4, TError> fourth, DotValid.Validated<T5, TError> fifth, DotValid.Validated<T6, TError> sixth, DotValid.Validated<T7, TError> seventh, DotValid.Validated<T8, TError> eighth, System.Func<T1, T2, T3, T4, T5, T6, T7, T8, TResult>! combine) -> DotValid.Validated<TResult, TError>
 static DotValid.Validated.Combine<T1, T2, T3, T4, T5, T6, T7, TResult, TError>(DotValid.Validated<T1, TError> first, DotValid.Validated<T2, TError> second, DotValid.Validated<T3, TError> third, DotValid.Validated<T4, TError> fourth, DotValid.Validated<T5, TError> fifth, DotValid.Validated<T6, TError> sixth, DotValid.Validated<T7, TError> seventh, System.Func<T1, T2, T3, T4, T5, T6, T7, TResult>! combine) -> DotValid.Validated<TResult, TError>
 static DotValid.Validated.Combine<T1, T2, T3, T4, T5, T6, TResult, TError>(DotValid.Validated<T1, TError> first, DotValid.Validated<T2, TError> second, DotValid.Validated<T3, TError> third, DotValid.Validated<T4, TError> fourth, DotValid.Validated<T5, TError> fifth, DotValid.Validated<T6, TError> sixth, System.Func<T1, T2, T3, T4, T5, T6, TResult>! combine) -> DotValid.Validated<TResult, TError>
@@ -58,5 +69,12 @@ static DotValid.Validated.Combine<T1, T2, T3, T4, T5, TResult, TError>(DotValid.
 static DotValid.Validated.Combine<T1, T2, T3, T4, TResult, TError>(DotValid.Validated<T1, TError> first, DotValid.Validated<T2, TError> second, DotValid.Validated<T3, TError> third, DotValid.Validated<T4, TError> fourth, System.Func<T1, T2, T3, T4, TResult>! combine) -> DotValid.Validated<TResult, TError>
 static DotValid.Validated.Combine<T1, T2, T3, TResult, TError>(DotValid.Validated<T1, TError> first, DotValid.Validated<T2, TError> second, DotValid.Validated<T3, TError> third, System.Func<T1, T2, T3, TResult>! combine) -> DotValid.Validated<TResult, TError>
 static DotValid.Validated.Combine<T1, T2, TResult, TError>(DotValid.Validated<T1, TError> first, DotValid.Validated<T2, TError> second, System.Func<T1, T2, TResult>! combine) -> DotValid.Validated<TResult, TError>
+static DotValid.Validated.FromNullable<T, TError>(T? value, System.Func<TError>! error) -> DotValid.Validated<T!, TError>
+static DotValid.Validated.FromNullable<T, TError>(T? value, System.Func<TError>! error) -> DotValid.Validated<T, TError>
+static DotValid.Validated.FromNullable<T, TError>(T? value, TError error) -> DotValid.Validated<T!, TError>
+static DotValid.Validated.FromNullable<T, TError>(T? value, TError error) -> DotValid.Validated<T, TError>
 static DotValid.Validated<T, TError>.operator !=(DotValid.Validated<T, TError> left, DotValid.Validated<T, TError> right) -> bool
 static DotValid.Validated<T, TError>.operator ==(DotValid.Validated<T, TError> left, DotValid.Validated<T, TError> right) -> bool
+static DotValid.ValidationError.operator !=(DotValid.ValidationError left, DotValid.ValidationError right) -> bool
+static DotValid.ValidationError.operator ==(DotValid.ValidationError left, DotValid.ValidationError right) -> bool
+~override DotValid.ValidationError.Equals(object obj) -> bool
