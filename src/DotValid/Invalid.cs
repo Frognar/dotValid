@@ -49,6 +49,9 @@ public readonly struct Invalid<TError> : IEquatable<Invalid<TError>>
         _errors = [.. errors];
     }
 
+    // Library code (MapError, Zip, Combine, ...) hands over arrays it built itself: never empty, no nulls, not shared.
+    private Invalid(ImmutableArray<TError> errors) => _errors = errors;
+
     /// <summary>
     /// Gets the errors, in order. Never empty.
     /// </summary>
@@ -88,6 +91,9 @@ public readonly struct Invalid<TError> : IEquatable<Invalid<TError>>
 
     /// <inheritdoc/>
     public override bool Equals(object? obj) => obj is Invalid<TError> other && Equals(other);
+
+    // Wraps errors the library built and checked itself, without copying them again.
+    internal static Invalid<TError> FromTrusted(ImmutableArray<TError> errors) => new(errors);
 
     /// <inheritdoc/>
     public override int GetHashCode()

@@ -85,6 +85,18 @@ int length = Parse(input).OrDefault(errors => -errors.Length);   // the factory 
 `Match` takes the value first, then the errors. Inside such a lambda, a parameter named `valid` or `invalid` hides the
 `Prelude` function of the same name; name it `value` or `errors` when the body creates a validation.
 
+### Transforming
+
+```csharp
+Validated<string, string> label = Parse(input).Map(number => $"#{number}");     // the errors pass through
+Validated<int, ValidationProblem> typed =
+    Parse(input).MapError(error => new ValidationProblem("Age", error));        // every error, order kept
+```
+
+`Map` transforms the value of a valid validation; `MapError` transforms each error of an invalid one, for example to
+attach a field name or translate codes into messages. A `null` from either delegate is rejected with
+`InvalidOperationException`: a validation never holds `null`.
+
 ### The uninitialized validation
 
 `Validated<T, TError>` is a struct, so `default(Validated<T, TError>)` exists, for example in a new array. It is
