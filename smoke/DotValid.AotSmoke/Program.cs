@@ -53,6 +53,16 @@ Validated<int, string>[] mixed = [age, failed, Parse("7")];
 Check(mixed.Sequence() == invalid("empty", "too short") && mixed.Values().Sum() == 49 && mixed.Errors().Count() == 2, "Sequence, Values, Errors");
 var (passed, problems) = mixed.Partition();
 Check(passed is [42, 7] && problems is ["empty", "too short"], "Partition");
+var described = await age.MatchAsync(
+    static async value =>
+    {
+        await Task.Yield();
+        return $"valid {value}";
+    },
+    static errors => $"{errors.Length} errors");
+Check(described == "valid 42" && await failed.MatchAsync(static _ => Task.FromResult(0), static errors => errors.Length) == 2, "MatchAsync");
+Check(await age.MapAsync(static value => Task.FromResult(value + 1)) == valid(43) && await failed.MapAsync(static value => Task.FromResult(value)) == failed, "MapAsync");
+Check(await Parse("7").ThenAsync(static value => Task.FromResult(Adult(value))) == invalid("too young"), "ThenAsync");
 
 if (failures.Count > 0)
 {
