@@ -1,5 +1,7 @@
 # dotValid
 
+[![CI](https://github.com/Frognar/dotValid/actions/workflows/ci.yml/badge.svg)](https://github.com/Frognar/dotValid/actions/workflows/ci.yml)
+
 Applicative validation for C# 15 built on union types: a `Validated<T, TError>` is either a valid value or one or more
 errors, and independent validations combine by accumulating every error instead of stopping at the first one.
 
